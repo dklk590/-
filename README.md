@@ -8,6 +8,8 @@ Android 六级单词学习程序，内置此前整理的 **3500 个核心词、1
 - [完整源码 ZIP](https://github.com/dklk590/-/archive/refs/heads/main.zip)
 - [GitHub Actions 构建记录](https://github.com/dklk590/-/actions)
 
+首次[GitHub 自动构建](https://github.com/dklk590/-/actions/runs/38160324722)已通过：原生编译、语音策略检查、APK签名验证和产物上传均成功。仓库 `apk/` 下的交付安装包保留旧版签名；Actions页面也可下载该次自建产物。
+
 交付 APK 已完成官方 SDK 编译、签名与资源一致性校验，SHA256：`755fc2be350021675b991acb0c5d3552ec8d0d043975c89601d64bad305e0939`。此 APK 沿用旧版证书；Actions 自建 APK 使用不同调试证书时请先导出备份。
 
 ## 安装和第一次使用
