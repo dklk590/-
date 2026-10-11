@@ -1,0 +1,142 @@
+{
+  "checked_at_utc": "2026-10-11T17:13:22.597491+00:00",
+  "build": {
+    "pipeline": "Official Android SDK AAPT2 + javac17 + D8 + zipalign + apksigner",
+    "native_compile": "passed",
+    "dex_conversion": "passed",
+    "compile_sdk": 35,
+    "min_sdk": 26,
+    "target_sdk": 35,
+    "java_source_target": 8,
+    "build_tools": "35.0.0",
+    "gradle_build_verified": false
+  },
+  "apk": {
+    "path": "app/build/outputs/apk/debug/wordweave-debug.apk",
+    "package": "com.wordweave.app",
+    "version_code": 2,
+    "version_name": "1.1.0",
+    "label": "词链 WordWeave",
+    "bytes": 759074,
+    "sha256": "755fc2be350021675b991acb0c5d3552ec8d0d043975c89601d64bad305e0939",
+    "zip_integrity": "passed",
+    "zip_alignment_4_bytes": "passed",
+    "dex_files": [
+      "classes.dex"
+    ],
+    "native_libraries": [],
+    "signature": {
+      "verified": true,
+      "v2": true,
+      "v3": true,
+      "certificate_sha256": "a40d317d98d17e72c48894c40c66e3a0ac9dbbf07246e6968daeb0632dd3f013",
+      "matches_previous_delivery_certificate": true
+    },
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.RECEIVE_BOOT_COMPLETED"
+    ],
+    "contains_private_signing_key": false
+  },
+  "embedded_assets": {
+    "NOTICE.txt": {
+      "byte_identical": true,
+      "bytes": 18767,
+      "sha256": "5c3ff842a88b870e2de9baf7c38f60770b85ee349346426a711ce215e13bc197"
+    },
+    "index.html": {
+      "byte_identical": true,
+      "bytes": 87874,
+      "sha256": "0b34ccdfdd08ad3bb08b433dae0ee383a33b9ecc8041f53a442718a61c28ad5d"
+    },
+    "lessons.json": {
+      "byte_identical": true,
+      "bytes": 1890383,
+      "sha256": "51847def7453ee7cf5dd80ba76388f59ab24699fcf68e2c33e126ce405a924f6"
+    },
+    "licenses/TATOEBA_CC_BY_2.0_FR.txt": {
+      "byte_identical": true,
+      "bytes": 16097,
+      "sha256": "bc1b08daaab9914922d986245357b44c782a84800882e9a9c5747909d0c7b210"
+    },
+    "licenses/TATOEBA_NOTICE.txt": {
+      "byte_identical": true,
+      "bytes": 1465,
+      "sha256": "efa23bc458311e79a52d2164df2967f470fcd0d612190aef9c5b3536ecb1b045"
+    },
+    "meaning_supplements.json": {
+      "byte_identical": true,
+      "bytes": 12772,
+      "sha256": "318e665badeb2d5366f8c8a68f8308d7f14ead7d8a91f189e9db8dc8a8d7d7f4"
+    },
+    "prompts/evaluate_translation.txt": {
+      "byte_identical": true,
+      "bytes": 2706,
+      "sha256": "797c1ae9d4d02890f4b26deb5e5f7430413eb5a5e3b28d4e6dd70e20fb5f9aba"
+    },
+    "prompts/generate_learning_packs.txt": {
+      "byte_identical": true,
+      "bytes": 4220,
+      "sha256": "6f0a66319e2551fb9bad2ec62ddf2e28ba50361abf7ead0bf57f2c182bbf889e"
+    },
+    "prompts/generate_reading.txt": {
+      "byte_identical": true,
+      "bytes": 2993,
+      "sha256": "0e9df15f467794b2435fcb9540e486a14495275bc3bbe5343014dcfbdf52cfb9"
+    },
+    "vocabulary.json": {
+      "byte_identical": true,
+      "bytes": 1332435,
+      "sha256": "96536cb1ca2bf67713b1d93d232527e3ea45ca4faa45ae4d74319e12e83e9884"
+    }
+  },
+  "embedded_word_count": 3500,
+  "embedded_lesson_count": 3500,
+  "embedded_lesson_source_counts": {
+    "tatoeba_pair": 1684,
+    "original": 1098,
+    "tatoeba_en_authored_zh": 718
+  },
+  "meaning_supplements_count": 44,
+  "corrected_dictionary_records": 6,
+  "module_tests": {
+    "result": "passed",
+    "sqlite_sql_and_repository_contract_cases": 17,
+    "learning_scheduler_production_checks": 366,
+    "word_choice_production_rule_checks": 17533,
+    "speech_production_policy_checks": 73,
+    "ai_protocol_checks": 66,
+    "ai_loopback_mock_calls": 33,
+    "ai_redirect_destination_calls": 0,
+    "ui_mock_bridge_calls": 43,
+    "ui_javascript_errors": 0,
+    "ui_browser_layout_viewport_px": 412,
+    "ui_browser_layout_horizontal_overflow": false,
+    "source": "Latest stable test runs reported by the owning agents before final SDK compilation."
+  },
+  "device_runtime_validation": {
+    "physical_device": false,
+    "emulator": false,
+    "live_tts_provider_or_voice_download": false,
+    "paid_ai_service": false,
+    "note": "Native compilation, APK integrity, embedded data, signature and alignment verified. Device TTS, provider downloads, system permissions and actual API compatibility were not exercised on Android hardware."
+  },
+  "embedded_data_license_notice": {
+    "combined_notice_path": "assets/NOTICE.txt",
+    "mit_full_source_license_in_notice": true,
+    "tatoeba_full_source_license_in_notice": true,
+    "tatoeba_path": "assets/licenses/TATOEBA_CC_BY_2.0_FR.txt",
+    "tatoeba_matches_source_license": true
+  },
+  "github_actions": {
+    "configured": true,
+    "executed_here": false,
+    "uploads_apk_only": true,
+    "official_verified_actions": {
+      "actions/checkout@v7": "https://github.com/actions/checkout",
+      "actions/setup-java@v6": "https://github.com/actions/setup-java",
+      "actions/upload-artifact@v7": "https://github.com/actions/upload-artifact"
+    }
+  }
+}

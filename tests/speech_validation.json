@@ -1,0 +1,15 @@
+{
+  "checked_at_utc": "2026-10-11T16:51:26.689948+00:00",
+  "native_speech_classes_compile": "passed against official Android35 API with Java8 source/target",
+  "production_segmentation_and_voice_policy_checks": 73,
+  "long_reading_case": "420 words, longer than 4000 characters; segmented without text loss",
+  "failed_voice_case": "Highest-quality failed voice excluded; lower-quality offline voice selected",
+  "live_device_tts_engine_or_voice_download_validation": false,
+  "ci_workflow": "configured, not executed here",
+  "version_code": 2,
+  "version_name": "1.1.0",
+  "signing_key_git_ignored": true,
+  "queue_recovery_case": "A synchronous failure of queued chunk2 with chunks0/1 not completed restarts at0; only contiguous completed chunks are skipped; out-of-order and stale completion cases covered.",
+  "compiled_speech_manager_sha256": "c98490fa82f57767862c249850b49b171c3121b282651bb17fc5e6a0b404c586",
+  "invalid_new_utterance_case": "Unicode-whitespace-only input is rejected before replacing active playback chunks or progress."
+}

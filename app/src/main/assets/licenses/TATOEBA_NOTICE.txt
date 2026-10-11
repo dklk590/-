@@ -1,0 +1,26 @@
+Tatoeba sentence attribution — WordWeave v1.1.0
+
+Source: Tatoeba and its contributors, https://tatoeba.org/
+Text licence: Creative Commons Attribution 2.0 France (CC BY 2.0 FR)
+https://creativecommons.org/licenses/by/2.0/fr/
+Full legal code: TATOEBA_CC_BY_2.0_FR.txt in this directory.
+
+Selected English sentences and directly linked Mandarin translations were obtained
+from the official detailed language exports and direct-link export:
+https://tatoeba.org/en/downloads
+https://downloads.tatoeba.org/exports/per_language/eng/eng_sentences_detailed.tsv.bz2
+https://downloads.tatoeba.org/exports/per_language/cmn/cmn_sentences_detailed.tsv.bz2
+https://downloads.tatoeba.org/exports/links.tar.bz2
+
+Per-sentence IDs, available contributor usernames and links are retained in
+app/src/main/assets/lessons.json and docs/例句来源索引.tsv. Entries using retained
+English with a newly authored Chinese translation are explicitly marked as such.
+Original replacement sentences are marked as project-original; their former
+Tatoeba sentence attribution is not applied to the replacement text.
+
+New Chinese translations, example usage explanations, and original examples were
+AI-assisted and individually reviewed in preparing this project. These sentences
+are not excerpts from the user's PDF or official CET-6 examination questions.
+
+This notice applies to the Tatoeba sentence text. ECDICT dictionary data are
+covered separately by the MIT licence in ECDICT_MIT.txt.
