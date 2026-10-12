@@ -1,92 +1,503 @@
 {
-  "checked_at_utc": "2026-10-11T17:13:22.597491+00:00",
+  "checked_at_utc": "2026-10-12T17:14:44.106158+00:00",
+  "version_name": "1.2.0",
+  "version_code": 3,
   "build": {
-    "pipeline": "Official Android SDK AAPT2 + javac17 + D8 + zipalign + apksigner",
-    "native_compile": "passed",
+    "pipeline": "Official Android SDK AAPT2 + JDK17 javac + D8 + zipalign + apksigner",
+    "application_java_compile": "passed",
     "dex_conversion": "passed",
     "compile_sdk": 35,
     "min_sdk": 26,
     "target_sdk": 35,
     "java_source_target": 8,
     "build_tools": "35.0.0",
-    "gradle_build_verified": false
+    "gradle_build_verified": false,
+    "ci_workflow_configured": true,
+    "ci_executed_here": false,
+    "pinned_dependency_files_verified": true
   },
-  "apk": {
-    "path": "app/build/outputs/apk/debug/wordweave-debug.apk",
-    "package": "com.wordweave.app",
-    "version_code": 2,
-    "version_name": "1.1.0",
-    "label": "词链 WordWeave",
-    "bytes": 759074,
-    "sha256": "755fc2be350021675b991acb0c5d3552ec8d0d043975c89601d64bad305e0939",
-    "zip_integrity": "passed",
-    "zip_alignment_4_bytes": "passed",
-    "dex_files": [
-      "classes.dex"
-    ],
-    "native_libraries": [],
-    "signature": {
-      "verified": true,
-      "v2": true,
-      "v3": true,
-      "certificate_sha256": "a40d317d98d17e72c48894c40c66e3a0ac9dbbf07246e6968daeb0632dd3f013",
-      "matches_previous_delivery_certificate": true
+  "apks": [
+    {
+      "variant": "universal",
+      "path": "app/build/outputs/apk/debug/wordweave-debug.apk",
+      "bytes": 43323502,
+      "sha256": "84ccbfd4437c91ed0b830c978bb8db8a72cffeaa273d7eb7b31dff9d9e8cdfa8",
+      "package": "com.wordweave.app",
+      "version_code": 3,
+      "version_name": "1.2.0",
+      "min_sdk": 26,
+      "target_sdk": 35,
+      "extract_native_libraries": false,
+      "zip_integrity": "passed",
+      "zipalign_4_and_16k": "passed",
+      "signature": {
+        "verified": true,
+        "v2": true,
+        "v3": true,
+        "certificate_sha256": "a40d317d98d17e72c48894c40c66e3a0ac9dbbf07246e6968daeb0632dd3f013",
+        "matches_previous_delivery_certificate": true
+      },
+      "dex_files": {
+        "classes.dex": "19234969c71105e3e7f0c1d645163d9b2525f5148fe633fc72875c70a754365e"
+      },
+      "native_libraries": [
+        {
+          "path": "lib/arm64-v8a/libsherpa-onnx-jni.so",
+          "bytes": 24169352,
+          "sha256": "b4a53d915c19cb6d09b1cdc9a8084be54419b647aab9097ffdfb46f30c3c4dd8",
+          "zip_compression": "stored",
+          "zip_payload_offset": 2686976,
+          "zip_payload_16k_aligned": true,
+          "elf": {
+            "bits": 64,
+            "load_alignment_16k": true,
+            "loads": [
+              {
+                "offset": 0,
+                "vaddr": 0,
+                "file_bytes": 23767520,
+                "memory_bytes": 23767520,
+                "flags": 5,
+                "alignment": 16384
+              },
+              {
+                "offset": 23767520,
+                "vaddr": 23783904,
+                "file_bytes": 395088,
+                "memory_bytes": 398880,
+                "flags": 6,
+                "alignment": 16384
+              },
+              {
+                "offset": 24162608,
+                "vaddr": 24195376,
+                "file_bytes": 4592,
+                "memory_bytes": 127784,
+                "flags": 6,
+                "alignment": 16384
+              }
+            ],
+            "relro": [
+              {
+                "offset": 23767520,
+                "vaddr": 23783904,
+                "file_bytes": 395088,
+                "memory_bytes": 398880,
+                "flags": 4,
+                "alignment": 1,
+                "end_mod_16k": 0
+              }
+            ]
+          }
+        },
+        {
+          "path": "lib/armeabi-v7a/libsherpa-onnx-jni.so",
+          "bytes": 16437284,
+          "sha256": "2c0350f9c23dda60318c0d195fcc02d505f05cdbfba89492a4468d2c4276be28",
+          "zip_compression": "stored",
+          "zip_payload_offset": 26869760,
+          "zip_payload_16k_aligned": true,
+          "elf": {
+            "bits": 32,
+            "load_alignment_16k": true,
+            "loads": [
+              {
+                "offset": 0,
+                "vaddr": 0,
+                "file_bytes": 16235008,
+                "memory_bytes": 16235008,
+                "flags": 5,
+                "alignment": 16384
+              },
+              {
+                "offset": 16235008,
+                "vaddr": 16251392,
+                "file_bytes": 198536,
+                "memory_bytes": 202240,
+                "flags": 6,
+                "alignment": 16384
+              },
+              {
+                "offset": 16433544,
+                "vaddr": 16466312,
+                "file_bytes": 2132,
+                "memory_bytes": 85897,
+                "flags": 6,
+                "alignment": 16384
+              }
+            ],
+            "relro": [
+              {
+                "offset": 16235008,
+                "vaddr": 16251392,
+                "file_bytes": 198536,
+                "memory_bytes": 202240,
+                "flags": 4,
+                "alignment": 1,
+                "end_mod_16k": 4096
+              }
+            ]
+          }
+        }
+      ],
+      "embedded_assets_byte_identical": true,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ],
+      "under_12500000_bytes": false
     },
-    "permissions": [
-      "android.permission.INTERNET",
-      "android.permission.POST_NOTIFICATIONS",
-      "android.permission.RECEIVE_BOOT_COMPLETED"
-    ],
-    "contains_private_signing_key": false
-  },
+    {
+      "variant": "arm64-v8a",
+      "path": "apk/WordWeave-v1.2.0-arm64-v8a.apk",
+      "bytes": 11661339,
+      "sha256": "1a565b3c3d2dd554f2738000cdcbec28ecd575e63fb8d784b69ab680ce8a002c",
+      "package": "com.wordweave.app",
+      "version_code": 3,
+      "version_name": "1.2.0",
+      "min_sdk": 26,
+      "target_sdk": 35,
+      "extract_native_libraries": true,
+      "zip_integrity": "passed",
+      "zipalign_4_and_16k": "passed",
+      "signature": {
+        "verified": true,
+        "v2": true,
+        "v3": true,
+        "certificate_sha256": "a40d317d98d17e72c48894c40c66e3a0ac9dbbf07246e6968daeb0632dd3f013",
+        "matches_previous_delivery_certificate": true
+      },
+      "dex_files": {
+        "classes.dex": "19234969c71105e3e7f0c1d645163d9b2525f5148fe633fc72875c70a754365e"
+      },
+      "native_libraries": [
+        {
+          "path": "lib/arm64-v8a/libsherpa-onnx-jni.so",
+          "bytes": 24169352,
+          "sha256": "b4a53d915c19cb6d09b1cdc9a8084be54419b647aab9097ffdfb46f30c3c4dd8",
+          "zip_compression": "deflated",
+          "zip_payload_offset": 2678621,
+          "zip_payload_16k_aligned": false,
+          "elf": {
+            "bits": 64,
+            "load_alignment_16k": true,
+            "loads": [
+              {
+                "offset": 0,
+                "vaddr": 0,
+                "file_bytes": 23767520,
+                "memory_bytes": 23767520,
+                "flags": 5,
+                "alignment": 16384
+              },
+              {
+                "offset": 23767520,
+                "vaddr": 23783904,
+                "file_bytes": 395088,
+                "memory_bytes": 398880,
+                "flags": 6,
+                "alignment": 16384
+              },
+              {
+                "offset": 24162608,
+                "vaddr": 24195376,
+                "file_bytes": 4592,
+                "memory_bytes": 127784,
+                "flags": 6,
+                "alignment": 16384
+              }
+            ],
+            "relro": [
+              {
+                "offset": 23767520,
+                "vaddr": 23783904,
+                "file_bytes": 395088,
+                "memory_bytes": 398880,
+                "flags": 4,
+                "alignment": 1,
+                "end_mod_16k": 0
+              }
+            ]
+          }
+        }
+      ],
+      "embedded_assets_byte_identical": true,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ],
+      "under_12500000_bytes": true
+    },
+    {
+      "variant": "armeabi-v7a",
+      "path": "apk/WordWeave-v1.2.0-armeabi-v7a.apk",
+      "bytes": 10776605,
+      "sha256": "df8a179e5d653e1bf9dea4687adb01f9a11ae5f4086d6d8c75876ce815ee3621",
+      "package": "com.wordweave.app",
+      "version_code": 3,
+      "version_name": "1.2.0",
+      "min_sdk": 26,
+      "target_sdk": 35,
+      "extract_native_libraries": true,
+      "zip_integrity": "passed",
+      "zipalign_4_and_16k": "passed",
+      "signature": {
+        "verified": true,
+        "v2": true,
+        "v3": true,
+        "certificate_sha256": "a40d317d98d17e72c48894c40c66e3a0ac9dbbf07246e6968daeb0632dd3f013",
+        "matches_previous_delivery_certificate": true
+      },
+      "dex_files": {
+        "classes.dex": "19234969c71105e3e7f0c1d645163d9b2525f5148fe633fc72875c70a754365e"
+      },
+      "native_libraries": [
+        {
+          "path": "lib/armeabi-v7a/libsherpa-onnx-jni.so",
+          "bytes": 16437284,
+          "sha256": "2c0350f9c23dda60318c0d195fcc02d505f05cdbfba89492a4468d2c4276be28",
+          "zip_compression": "deflated",
+          "zip_payload_offset": 2678623,
+          "zip_payload_16k_aligned": false,
+          "elf": {
+            "bits": 32,
+            "load_alignment_16k": true,
+            "loads": [
+              {
+                "offset": 0,
+                "vaddr": 0,
+                "file_bytes": 16235008,
+                "memory_bytes": 16235008,
+                "flags": 5,
+                "alignment": 16384
+              },
+              {
+                "offset": 16235008,
+                "vaddr": 16251392,
+                "file_bytes": 198536,
+                "memory_bytes": 202240,
+                "flags": 6,
+                "alignment": 16384
+              },
+              {
+                "offset": 16433544,
+                "vaddr": 16466312,
+                "file_bytes": 2132,
+                "memory_bytes": 85897,
+                "flags": 6,
+                "alignment": 16384
+              }
+            ],
+            "relro": [
+              {
+                "offset": 16235008,
+                "vaddr": 16251392,
+                "file_bytes": 198536,
+                "memory_bytes": 202240,
+                "flags": 4,
+                "alignment": 1,
+                "end_mod_16k": 4096
+              }
+            ]
+          }
+        }
+      ],
+      "embedded_assets_byte_identical": true,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ],
+      "under_12500000_bytes": true
+    }
+  ],
+  "all_apk_dex_byte_identical": true,
+  "all_apk_assets_byte_identical": true,
   "embedded_assets": {
     "NOTICE.txt": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 18767,
       "sha256": "5c3ff842a88b870e2de9baf7c38f60770b85ee349346426a711ce215e13bc197"
     },
     "index.html": {
-      "byte_identical": true,
-      "bytes": 87874,
-      "sha256": "0b34ccdfdd08ad3bb08b433dae0ee383a33b9ecc8041f53a442718a61c28ad5d"
+      "byte_identical_all_three": true,
+      "bytes": 105411,
+      "sha256": "f673a11da8375a3953e968f4f58b113a8b3831724621732f2a2edd7b645ed710"
     },
     "lessons.json": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 1890383,
       "sha256": "51847def7453ee7cf5dd80ba76388f59ab24699fcf68e2c33e126ce405a924f6"
     },
     "licenses/TATOEBA_CC_BY_2.0_FR.txt": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 16097,
       "sha256": "bc1b08daaab9914922d986245357b44c782a84800882e9a9c5747909d0c7b210"
     },
     "licenses/TATOEBA_NOTICE.txt": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 1465,
       "sha256": "efa23bc458311e79a52d2164df2967f470fcd0d612190aef9c5b3536ecb1b045"
     },
+    "licenses/dependencies/ESPEAK_NG_GPL3.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    "licenses/dependencies/HCLUST_CPP_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 1483,
+      "sha256": "e361d842da1d290351860ad6dcce2673a1e42e4f873a3ae1ff4eb92c6adaa882"
+    },
+    "licenses/dependencies/JETBRAINS_ANNOTATIONS_APACHE2.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "licenses/dependencies/KALDIFST_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11728,
+      "sha256": "a682d6efd1ee5dee08a8e405c233c2c198ea70ae0718129daa83ab58cfe31c5d"
+    },
+    "licenses/dependencies/KALDI_DECODER_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "licenses/dependencies/KALDI_NATIVE_FBANK_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "licenses/dependencies/KISSFFT_BSD3.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 1830,
+      "sha256": "4d6bcab46f27d6d0c878e8305d4bdcfe040d52bf6656b9771f04c9fb9902c0ed"
+    },
+    "licenses/dependencies/KISSFFT_COPYING.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 246,
+      "sha256": "a2840585f8411be8e6826a31ef15ae65c950bd74a2437a73b013398a934ad0c6"
+    },
+    "licenses/dependencies/KOTLIN_APACHE2.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "licenses/dependencies/KOTLIN_NOTICE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 482,
+      "sha256": "ea7099352103ade6a6918bc7efb00f8bcd43db0e76b2da2e83237c0bc0ff1b19"
+    },
+    "licenses/dependencies/LIBCXX_APACHE2_LLVM_EXCEPTION.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+    },
+    "licenses/dependencies/NLOHMANN_JSON_MIT.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 1076,
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    "licenses/dependencies/ONNXRUNTIME_MIT.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 1073,
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    },
+    "licenses/dependencies/ONNXRUNTIME_ThirdPartyNotices.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 325054,
+      "sha256": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2"
+    },
+    "licenses/dependencies/OPENFST_COPYING.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 559,
+      "sha256": "4300529197035fd3452350718a0b8cee984e9412c9932d7f35fcde849fc97a4b"
+    },
+    "licenses/dependencies/PIPER_PHONEMIZE_MIT.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 1071,
+      "sha256": "13746d509d74e55ea2265fbef204bb7cdbf84a8315b0207e988326cb54387028"
+    },
+    "licenses/dependencies/SHERPA_ONNX_APACHE2.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "licenses/dependencies/SIMPLE_SENTENCEPIECE_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    "licenses/dependencies/THIRD_PARTY_RUNTIME_NOTICE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 2990,
+      "sha256": "7b720b9d260d25a6b2dfc6f3157dbd509776165b9bc6f9bc7979360a5c32ccd7"
+    },
+    "licenses/dependencies/commons-codec-1.19.0_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11359,
+      "sha256": "b1d2870f1a00e4d7f56576e5f0870cba109e041f8af66866cf5b499478e654e7"
+    },
+    "licenses/dependencies/commons-codec-1.19.0_NOTICE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 175,
+      "sha256": "b64933ee1d36d14659156223a2604edadb60bffdd465d5368ff422d7689db5fb"
+    },
+    "licenses/dependencies/commons-compress-1.28.0_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11358,
+      "sha256": "51b88fd3e9e24edcdce1dd145a4fca2dcd12911407f00b06dfa6ff600f9733c1"
+    },
+    "licenses/dependencies/commons-compress-1.28.0_NOTICE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 178,
+      "sha256": "0d98967f0ab328af8d9d536aa9a5c684b5dd665657245f6ee6b5915affe811c0"
+    },
+    "licenses/dependencies/commons-io-2.20.0_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11360,
+      "sha256": "c1d1a38c99c48ccad170890ade6066e2e240bb6ce59861d4eb7f672eddd2a4c6"
+    },
+    "licenses/dependencies/commons-io-2.20.0_NOTICE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 172,
+      "sha256": "b54b0db6c617273efff79ba193bb01b05eadcddfff55c24063b38b2acef714c3"
+    },
+    "licenses/dependencies/commons-lang3-3.18.0_LICENSE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 11359,
+      "sha256": "b1d2870f1a00e4d7f56576e5f0870cba109e041f8af66866cf5b499478e654e7"
+    },
+    "licenses/dependencies/commons-lang3-3.18.0_NOTICE.txt": {
+      "byte_identical_all_three": true,
+      "bytes": 174,
+      "sha256": "64bc8696af3f6c770521412b85d3a733fa44b2ef5b0f4bd739e0c4d02eca492a"
+    },
     "meaning_supplements.json": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 12772,
       "sha256": "318e665badeb2d5366f8c8a68f8308d7f14ead7d8a91f189e9db8dc8a8d7d7f4"
     },
     "prompts/evaluate_translation.txt": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 2706,
       "sha256": "797c1ae9d4d02890f4b26deb5e5f7430413eb5a5e3b28d4e6dd70e20fb5f9aba"
     },
     "prompts/generate_learning_packs.txt": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 4220,
       "sha256": "6f0a66319e2551fb9bad2ec62ddf2e28ba50361abf7ead0bf57f2c182bbf889e"
     },
     "prompts/generate_reading.txt": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 2993,
       "sha256": "0e9df15f467794b2435fcb9540e486a14495275bc3bbe5343014dcfbdf52cfb9"
     },
     "vocabulary.json": {
-      "byte_identical": true,
+      "byte_identical_all_three": true,
       "bytes": 1332435,
       "sha256": "96536cb1ca2bf67713b1d93d232527e3ea45ca4faa45ae4d74319e12e83e9884"
     }
@@ -99,8 +510,20 @@
     "tatoeba_en_authored_zh": 718
   },
   "meaning_supplements_count": 44,
-  "corrected_dictionary_records": 6,
-  "module_tests": {
+  "current_v12_module_checks": {
+    "speech_playback_jvm_checks": 782,
+    "model_download_synthetic_catalog_checks": 76,
+    "model_download_with_four_real_archive_checks": 80,
+    "ui_mock_bridge_calls": 102,
+    "ui_javascript_errors": 0,
+    "real_linux_native_model_generations": 6,
+    "real_linux_native_models": 4,
+    "speech_validation_source": "tests/speech_validation.json",
+    "model_download_validation_source": "tests/model_download_validation.json",
+    "native_model_validation_source": "tests/native_model_validation.json",
+    "ui_validation": "Owning UI agent mock test result; frozen HTML hash matches all APKs"
+  },
+  "historical_v11_module_checks": {
     "result": "passed",
     "sqlite_sql_and_repository_contract_cases": 17,
     "learning_scheduler_production_checks": 366,
@@ -115,28 +538,37 @@
     "ui_browser_layout_horizontal_overflow": false,
     "source": "Latest stable test runs reported by the owning agents before final SDK compilation."
   },
+  "native_compatibility": {
+    "source": "Official static-ONNX-runtime AAR 1.13.8, unchanged ARM JNI bytes verified against dependencies.lock.json",
+    "source_aarch64_min_api_note": 21,
+    "ndk_note": "r29 build 14206865",
+    "arm64_load_16k": true,
+    "arm64_relro_end_16k": true,
+    "armeabi_load_16k": true,
+    "armeabi_relro_end_mod_16k": 4096,
+    "universal_jni_stored_and_zip_16k_aligned": true,
+    "abi_apks_jni_deflated_and_extract_native_libs_true": true,
+    "physical_16k_device_exercised": false,
+    "note": "ELF/ZIP checks and Linux JNI generation do not establish Android device, Android 16 or every vendor compatibility. ARMv7 is the 32-bit compatibility variant."
+  },
+  "software_license": {
+    "license": "GPL-3.0-or-later",
+    "root_text": "LICENSE",
+    "component_notice": "NOTICE",
+    "apk_notice": "assets/licenses/dependencies/THIRD_PARTY_RUNTIME_NOTICE.txt",
+    "corresponding_source": "docs/第三方依赖与对应源码.md",
+    "data_separate_licenses": true,
+    "model_weights_embedded": false
+  },
   "device_runtime_validation": {
     "physical_device": false,
     "emulator": false,
-    "live_tts_provider_or_voice_download": false,
+    "android_native_model_inference": false,
+    "audio_track_pause_resume": false,
+    "live_system_tts_voice_download": false,
+    "android_download_manager_restart": false,
     "paid_ai_service": false,
-    "note": "Native compilation, APK integrity, embedded data, signature and alignment verified. Device TTS, provider downloads, system permissions and actual API compatibility were not exercised on Android hardware."
+    "note": "Java core and mocked UI tests, APK metadata/signature/assets, ELF/ZIP checks, and actual Linux model generation passed. Phone audio and lifecycle behavior still need device verification."
   },
-  "embedded_data_license_notice": {
-    "combined_notice_path": "assets/NOTICE.txt",
-    "mit_full_source_license_in_notice": true,
-    "tatoeba_full_source_license_in_notice": true,
-    "tatoeba_path": "assets/licenses/TATOEBA_CC_BY_2.0_FR.txt",
-    "tatoeba_matches_source_license": true
-  },
-  "github_actions": {
-    "configured": true,
-    "executed_here": false,
-    "uploads_apk_only": true,
-    "official_verified_actions": {
-      "actions/checkout@v7": "https://github.com/actions/checkout",
-      "actions/setup-java@v6": "https://github.com/actions/setup-java",
-      "actions/upload-artifact@v7": "https://github.com/actions/upload-artifact"
-    }
-  }
+  "private_update_signing_key_in_public_source": false
 }

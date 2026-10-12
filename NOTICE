@@ -1,0 +1,46 @@
+词链 WordWeave v1.2.0 — software and runtime notices
+
+WordWeave application software is licensed under GNU GPL version 3 or later.
+See LICENSE in the source project and ESPEAK_NG_GPL3.txt here for the license text.
+Vocabulary, example sentences and model weights have separate licenses; the
+application license does not replace them. The vocabulary and sentence notices
+are in assets/NOTICE.txt. Model source/license information is shown before download
+and retained with each installed model. Model weights are not embedded in this APK.
+
+Bundled runtime components:
+- sherpa-onnx 1.13.8: Copyright (c) 2022-2026 Xiaomi Corporation; Apache License 2.0.
+  https://github.com/k2-fsa/sherpa-onnx/tree/v1.13.8
+- eSpeak NG (for Piper), source commit ed530aa113046142eb5115cf2fc9157854d0ffe1:
+  Copyright eSpeak/eSpeak NG contributors; GNU GPL version 3 or later.
+  https://github.com/csukuangfj/espeak-ng/tree/ed530aa113046142eb5115cf2fc9157854d0ffe1
+- piper-phonemize source commit f3ff95afc03640bc1399e113e83361192a2fafb4:
+  Copyright (c) 2023 Michael Hansen; MIT License.
+  https://github.com/csukuangfj/piper-phonemize/tree/f3ff95afc03640bc1399e113e83361192a2fafb4
+- ONNX Runtime 1.28.2 and its included third-party components:
+  Copyright (c) Microsoft Corporation; MIT License and component notices.
+  https://github.com/microsoft/onnxruntime/tree/v1.28.2
+- Other sherpa-onnx static runtime components: kaldi-native-fbank 1.22.3,
+  kaldi-decoder 0.3.0, simple-sentencepiece 0.7, nlohmann/json 3.12.0,
+  hclust-cpp 2026-02-25; transitive libraries include KissFFT commit
+  febd4caeed32e33ad8b2e0bb5ea77542c40f18ec (Copyright 2003-2010 Mark
+  Borgerding, BSD-3-Clause), kaldifst 1.8.0, OpenFst 1.8.5-2026-04-10
+  (Apache-2.0), and Eigen 3.4.0 (MPL-2.0; full license in ONNX Runtime
+  ThirdPartyNotices). Source links, copyright notices and license texts are included.
+- Kotlin standard library 1.9.24: Copyright JetBrains s.r.o. and contributors;
+  Apache License 2.0. https://github.com/JetBrains/kotlin/tree/v1.9.24
+- JetBrains annotations 13.0: Copyright JetBrains s.r.o.; Apache License 2.0.
+  https://repo1.maven.org/maven2/org/jetbrains/annotations/13.0/
+- Apache Commons Compress 1.28.0, IO 2.20.0, Lang 3.18.0, Codec 1.19.0:
+  Copyright The Apache Software Foundation; Apache License 2.0, with included notices.
+  https://commons.apache.org/
+- Android NDK r29 static C++ runtime: LLVM Apache License 2.0 with LLVM Exceptions;
+  the bundled native ELF notes identify NDK r29 build 14206865.
+  https://android.googlesource.com/toolchain/llvm-project/
+
+The exact binary hashes, sizes, official download URLs, extraction procedure,
+corresponding-source links and native build recipe are provided in the public source
+project: dependencies.lock.json and docs/第三方依赖与对应源码.md.
+https://github.com/dklk590/-
+
+The local update signing private key is not published. Source and build instructions
+are sufficient to compile modified software and sign it with your own key.

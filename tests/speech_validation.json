@@ -1,15 +1,80 @@
 {
-  "checked_at_utc": "2026-10-11T16:51:26.689948+00:00",
-  "native_speech_classes_compile": "passed against official Android35 API with Java8 source/target",
-  "production_segmentation_and_voice_policy_checks": 73,
-  "long_reading_case": "420 words, longer than 4000 characters; segmented without text loss",
-  "failed_voice_case": "Highest-quality failed voice excluded; lower-quality offline voice selected",
-  "live_device_tts_engine_or_voice_download_validation": false,
-  "ci_workflow": "configured, not executed here",
-  "version_code": 2,
-  "version_name": "1.1.0",
-  "signing_key_git_ignored": true,
-  "queue_recovery_case": "A synchronous failure of queued chunk2 with chunks0/1 not completed restarts at0; only contiguous completed chunks are skipped; out-of-order and stale completion cases covered.",
-  "compiled_speech_manager_sha256": "c98490fa82f57767862c249850b49b171c3121b282651bb17fc5e6a0b404c586",
-  "invalid_new_utterance_case": "Unicode-whitespace-only input is rejected before replacing active playback chunks or progress."
+  "checked_at_utc": "2026-10-12T17:14:44.106158+00:00",
+  "version_code": 3,
+  "version_name": "1.2.0",
+  "result": "passed for Java core tests and Android API compilation; device audio not exercised",
+  "java_core_playback_checks": 782,
+  "java_core_test": {
+    "result": "passed",
+    "class": "com.wordweave.app.SpeechPlaybackTest",
+    "file": "tests/SpeechPlaybackTest.java",
+    "runtime": "Actual JVM execution; no Android or native TTS mocks",
+    "coverage": [
+      "Individual-sentence/long-sentence segmentation, quoted punctuation, paragraph breaks, abbreviations, and surrogate-pair boundaries",
+      "Contiguous completed-character progress, out-of-order/duplicate/old session callbacks, interrupted-segment retry, and word/reading context replacement",
+      "Invalid new input preserves the active playback session",
+      "Pause waits, resume wakes the worker without losing completed progress, and stop wakes/invalidates a paused worker",
+      "Bounded PCM LRU memory accounting, replacement, eviction, and invalid-sample rejection",
+      "Two-thread native-release/queued-filesystem-delete window: the target model remains blocked until actual delete finally",
+      "Independent models remain available; duplicate delete gates and failed-delete finally recovery"
+    ]
+  },
+  "android_api_compile": {
+    "result": "passed",
+    "compile_sdk": 35,
+    "min_sdk": 26,
+    "scope": "Final direct SDK compilation of all current application Java sources, including the fixed British Kokoro adapter and Activity deletion guard; all three APKs use identical DEX.",
+    "compiler": "JDK 17 javac",
+    "app_java_source_target": 8,
+    "real_dependencies": [
+      "Official sherpa-onnx Android 1.13.8 classes and JNI adapter",
+      "Kotlin standard library 1.9.24",
+      "Android 35 API",
+      "Pinned model-download archive dependencies"
+    ],
+    "note": "Compilation verifies Java/API compatibility. It does not prove JNI inference or audio output on a phone.",
+    "final_build_verified": true
+  },
+  "playback_design_review": {
+    "system_tts": {
+      "queue": "One segment at a time; unique utterance identity plus binding/session tokens reject old callbacks",
+      "pause": "Stop the current system utterance and invalidate its callback identity",
+      "resume": "Replay the current unfinished sentence/segment, keeping the completed prefix; unusually long sentences may be split for engine limits",
+      "device_measured": false
+    },
+    "offline_tts": {
+      "synthesis": "Native model construction, generation and close run serially on a background executor",
+      "audio": "Float PCM through streaming AudioTrack with non-blocking writes; wait for actual playback head before recording a completed segment",
+      "pause": "AudioTrack.pause retains queued samples and playhead; the worker waits while paused",
+      "resume": "AudioTrack.play continues the retained queue at its audio position, without synthesizing or replaying heard samples",
+      "stop": "Invalidate the playback token and immediately pause/flush audio; late synthesis output cannot start a replacement session",
+      "cache_key": "provider + model ID + speaker ID + speaker locale + speed + segment text; bounded RAM cache, no reading PCM on disk",
+      "device_measured": false
+    },
+    "model_delete": "Persistent per-model gate starts before releaseModel and ends only in Main delete finally via modelDeletionFinished; JNI release alone does not reopen the model. Current matching offline playback stops, other models continue."
+  },
+  "device_runtime_validation": {
+    "physical_device": false,
+    "emulator": false,
+    "audio_track_pause_resume": false,
+    "system_tts_sentence_pause_resume": false,
+    "android_native_model_inference": false,
+    "live_system_voice_data_download": false,
+    "note": "All pause/resume and native-runtime descriptions above are implementation/design review, not measured hardware playback results."
+  },
+  "source_sha256": {
+    "app/src/main/java/com/wordweave/app/SpeechManager.java": "a774dc51cd3753e3a24672ba122ac6ff0bbd296f60828134a2cd70238838c5c9",
+    "app/src/main/java/com/wordweave/app/OfflineSpeechManager.java": "c2e06e703f809a12fa0dfcabb1c4d273caf38811871f20d534893a78c47688e4",
+    "app/src/main/java/com/wordweave/app/SpeechPlayback.java": "78eeb99fc35d3fae5b498809ad173b6e1da99c1e295a68299ac5bdcdc3bf1efd",
+    "app/src/main/java/com/wordweave/app/SherpaTtsBackend.java": "30455c6693f9901aeb325497c031932e9e39c9e2b106b82c71e0b77b469e7f2d",
+    "app/src/main/java/com/wordweave/app/MainActivity.java": "895f618704d29c305e8df16e049e3caf50f8045f3f8ca2c0beabce113e4fcb16",
+    "tests/SpeechPlaybackTest.java": "b230eed8473f59571d7c804cc7bf6fe8bcbf904fce632ab24557b4db719adca7"
+  },
+  "previousChecks": {
+    "version_name": "1.1.0",
+    "version_code": 2,
+    "speech_segmentation_voice_policy_checks": 73,
+    "note": "Historical result only; the current v1.2 playback test result is 782."
+  },
+  "ci_workflow": "configured, not executed here"
 }

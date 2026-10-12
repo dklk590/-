@@ -1,0 +1,63 @@
+{
+  "format": 1,
+  "sherpaVersion": "1.13.8",
+  "officialStaticAarUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.8/sherpa-onnx-static-link-onnxruntime-1.13.8.aar",
+  "officialStaticAarSha256": "b22c3fc1b6a45666d28892bb2f7694beeb77a8362d7ebd77c1a5431ec9435471",
+  "files": [
+    {
+      "path": "app/libs/annotations-13.0.jar",
+      "bytes": 17536,
+      "sha256": "ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478"
+    },
+    {
+      "path": "app/libs/commons-codec-1.19.0.jar",
+      "bytes": 374716,
+      "sha256": "5c3881e4f556855e9c532927ee0c9dfde94cc66760d5805c031a59887070af5f"
+    },
+    {
+      "path": "app/libs/commons-compress-1.28.0.jar",
+      "bytes": 1117221,
+      "sha256": "e1522945218456f3649a39bc4afd70ce4bd466221519dba7d378f2141a4642ca"
+    },
+    {
+      "path": "app/libs/commons-io-2.20.0.jar",
+      "bytes": 563971,
+      "sha256": "df90bba0fe3cb586b7f164e78fe8f8f4da3f2dd5c27fa645f888100ccc25dd72"
+    },
+    {
+      "path": "app/libs/commons-lang3-3.18.0.jar",
+      "bytes": 702952,
+      "sha256": "4eeeae8d20c078abb64b015ec158add383ac581571cddc45c68f0c9ae0230720"
+    },
+    {
+      "path": "app/libs/kotlin-stdlib-1.9.24.jar",
+      "bytes": 1718956,
+      "sha256": "858b902696da9cf585ab9d98ffc1c2712269828354dfe9107e3711b084a36468"
+    },
+    {
+      "path": "app/libs/sherpa-onnx-android-1.13.8.jar",
+      "bytes": 238706,
+      "sha256": "8af5aa647494ec9cb6596959d6d20864377cf4a9dedf1c1b178d936bfb7cea95"
+    }
+  ],
+  "nativeArchives": [
+    {
+      "abi": "arm64-v8a",
+      "archive": "app/native/libsherpa-onnx-jni-arm64-v8a.so.gz",
+      "output": "app/src/main/jniLibs/arm64-v8a/libsherpa-onnx-jni.so",
+      "archiveBytes": 8967237,
+      "archiveSha256": "0ff58536c759c9f302e4acaa8a3c6f0f7fdbf988d6bae455b3816699db00b43d",
+      "rawBytes": 24169352,
+      "rawSha256": "b4a53d915c19cb6d09b1cdc9a8084be54419b647aab9097ffdfb46f30c3c4dd8"
+    },
+    {
+      "abi": "armeabi-v7a",
+      "archive": "app/native/libsherpa-onnx-jni-armeabi-v7a.so.gz",
+      "output": "app/src/main/jniLibs/armeabi-v7a/libsherpa-onnx-jni.so",
+      "archiveBytes": 8080412,
+      "archiveSha256": "fed9414ea239f4a95d3fb799a205cb589748168ba79b4b4349f8e8a0b77dca7f",
+      "rawBytes": 16437284,
+      "rawSha256": "2c0350f9c23dda60318c0d195fcc02d505f05cdbfba89492a4468d2c4276be28"
+    }
+  ]
+}

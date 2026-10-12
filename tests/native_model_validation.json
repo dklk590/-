@@ -1,0 +1,328 @@
+{
+  "result": "passed_after_fix",
+  "scope": "Real Linux x86_64 JNI generation with official sherpa-onnx 1.13.8 JVM/native JARs and SHA256-verified official model packs. This is not Android device, AudioTrack, 16KB Android page-size, pronunciation-quality, mobile speed or RAM validation.",
+  "host": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "javaVersion": "openjdk version \"17.0.20\" 2026-07-21\nOpenJDK Runtime Environment (build 17.0.20+8-1-24.04-Ubuntu)\nOpenJDK 64-Bit Server VM (build 17.0.20+8-1-24.04-Ubuntu, mixed mode, sharing)",
+    "timings": "Linux host observations only; not phone benchmarks"
+  },
+  "runtimeInputs": [
+    {
+      "filename": "sherpa-onnx-jvm-1.13.8.jar",
+      "bytes": 187490,
+      "sha256": "77b7b047fade4eadada96b568eb92615049aaf1dc317c7244e46c1ea38b9a63b"
+    },
+    {
+      "filename": "sherpa-onnx-native-lib-linux-x64-1.13.8.jar",
+      "bytes": 10515871,
+      "sha256": "30c93b59381113f9c20aedbbf9fc1ad399158f6bc03dddc0f8934a6e28e069ba"
+    }
+  ],
+  "text": "The morning sun shines through the window.",
+  "newSuccessfulGenerationCases": 4,
+  "newValidationCases": [
+    {
+      "modelId": "vits-piper-en_US-lessac-medium",
+      "durationSeconds": 1.9736961451247166,
+      "loadSeconds": 0.85835593,
+      "speakerId": 0,
+      "peak": 0.5770639181137085,
+      "numSpeakers": 1,
+      "sampleRate": 22050,
+      "wav": "piper-us.wav",
+      "speed": 1,
+      "samples": 43520,
+      "generationSeconds": 0.135568653,
+      "mode": "piper-us",
+      "nonzeroSamples": 43520,
+      "allSamplesFinite": true,
+      "rms": 0.11712685438733622,
+      "text": "The morning sun shines through the window.",
+      "cpuThreads": 2,
+      "lang": "",
+      "lexicon": "",
+      "status": "passed",
+      "independentWavValidation": {
+        "status": "passed",
+        "channels": 1,
+        "sampleWidthBytes": 2,
+        "sampleRate": 22050,
+        "frames": 43520,
+        "nonzeroPcm16Samples": 42014,
+        "peakPcm16": 18908,
+        "bytes": 87084,
+        "sha256": "92693bb03512502ba6fa0d204e02584470841c2b06b71b7c02e89faf1cbf5b3a"
+      },
+      "modelInputs": [
+        {
+          "filename": "tokens.txt",
+          "bytes": 921,
+          "sha256": "87c8ef66eae5473ed0cc0366b3964c736ca6c5f676c979522ea31234e47430b9"
+        },
+        {
+          "filename": "en_US-lessac-medium.onnx",
+          "bytes": 63149198,
+          "sha256": "4ba07d8549906668ee855fd9abf9faf66c5db74742712ff026a159f7277fca9f"
+        }
+      ],
+      "modelSourceArchive": {
+        "name": "vits-piper-en_US-lessac-medium.tar.bz2",
+        "archiveBytes": 67230653,
+        "sha256": "9e3febfacf0abf4270172d2958bcec246032b7e88efc2720840cc80c93de334e",
+        "unpackedBytes": 81147006,
+        "entries": 397
+      },
+      "dataDir": "espeak-ng-data",
+      "voiceLabel": "Lessac"
+    },
+    {
+      "modelId": "vits-piper-en_GB-alan-medium",
+      "durationSeconds": 2.4047165532879817,
+      "loadSeconds": 1.146839619,
+      "speakerId": 0,
+      "peak": 0.8662346005439758,
+      "numSpeakers": 1,
+      "sampleRate": 22050,
+      "wav": "piper-gb.wav",
+      "speed": 1,
+      "samples": 53024,
+      "generationSeconds": 0.183647568,
+      "mode": "piper-gb",
+      "nonzeroSamples": 53024,
+      "allSamplesFinite": true,
+      "rms": 0.1567289323949853,
+      "text": "The morning sun shines through the window.",
+      "cpuThreads": 2,
+      "lang": "",
+      "lexicon": "",
+      "status": "passed",
+      "independentWavValidation": {
+        "status": "passed",
+        "channels": 1,
+        "sampleWidthBytes": 2,
+        "sampleRate": 22050,
+        "frames": 53024,
+        "nonzeroPcm16Samples": 52929,
+        "peakPcm16": 28383,
+        "bytes": 106092,
+        "sha256": "f176b18f6f5ef710c9c0eb760141f5df9d71ff4ccf2b99f242e6709b50413dd7"
+      },
+      "modelInputs": [
+        {
+          "filename": "tokens.txt",
+          "bytes": 921,
+          "sha256": "87c8ef66eae5473ed0cc0366b3964c736ca6c5f676c979522ea31234e47430b9"
+        },
+        {
+          "filename": "en_GB-alan-medium.onnx",
+          "bytes": 63201430,
+          "sha256": "d907c48857000940104a9ad3248a94617df917d1a525c9495490fdbf87fd54b2"
+        }
+      ],
+      "modelSourceArchive": {
+        "name": "vits-piper-en_GB-alan-medium.tar.bz2",
+        "archiveBytes": 67220121,
+        "sha256": "a48d4017da0f77668b27bed63fe6e04dd64c6397e1fadad4f460efb0ef7c9012",
+        "unpackedBytes": 81199210,
+        "entries": 397
+      },
+      "dataDir": "espeak-ng-data",
+      "voiceLabel": "Alan"
+    },
+    {
+      "modelId": "kokoro-int8-multi-lang-v1_0",
+      "durationSeconds": 2.0955833333333334,
+      "loadSeconds": 1.311915242,
+      "speakerId": 3,
+      "peak": 0.3274146020412445,
+      "numSpeakers": 54,
+      "sampleRate": 24000,
+      "wav": "kokoro-us.wav",
+      "speed": 1,
+      "samples": 50294,
+      "generationSeconds": 2.640932593,
+      "mode": "kokoro-us",
+      "nonzeroSamples": 50294,
+      "allSamplesFinite": true,
+      "rms": 0.06353022524757038,
+      "text": "The morning sun shines through the window.",
+      "cpuThreads": 2,
+      "lang": "en-us",
+      "lexicon": "lexicon-us-en.txt",
+      "status": "passed",
+      "independentWavValidation": {
+        "status": "passed",
+        "channels": 1,
+        "sampleWidthBytes": 2,
+        "sampleRate": 24000,
+        "frames": 50294,
+        "nonzeroPcm16Samples": 48601,
+        "peakPcm16": 10728,
+        "bytes": 100632,
+        "sha256": "576564800700cddca777b88c88995d01bc4be735d065d23203d9eae9d8124172"
+      },
+      "modelInputs": [
+        {
+          "filename": "tokens.txt",
+          "bytes": 687,
+          "sha256": "6ebb6bb288f20f3ae8d004d3c2ca27697da27c037d75e81a60e2a6a663f95425"
+        },
+        {
+          "filename": "model.int8.onnx",
+          "bytes": 114203756,
+          "sha256": "4b86207ef680e394d8343bee22dfc4c512e5c707c6d9578e3f35ab09bffd6b36"
+        },
+        {
+          "filename": "voices.bin",
+          "bytes": 28200960,
+          "sha256": "1c5a5b983d3d50d8586d437a51f3faa2da7919ce76a013c081e65671a3447c29"
+        },
+        {
+          "filename": "lexicon-us-en.txt",
+          "bytes": 5898240,
+          "sha256": "9a05d96ab369d8bbd2944506ad363af90c9b56bfa01fa3fc8725aea10a92db39"
+        }
+      ],
+      "modelSourceArchive": {
+        "name": "kokoro-int8-multi-lang-v1_0.tar.bz2",
+        "archiveBytes": 132303094,
+        "sha256": "4c3052abaa60943a341f193888cf6abd68787dae6ab8ae5c925a706caa247e4e",
+        "unpackedBytes": 189882497,
+        "entries": 417
+      },
+      "dataDir": "espeak-ng-data",
+      "voiceLabel": "af_heart"
+    },
+    {
+      "modelId": "kokoro-int8-multi-lang-v1_0",
+      "durationSeconds": 2.273625,
+      "loadSeconds": 1.272933521,
+      "speakerId": 20,
+      "peak": 0.4419923424720764,
+      "numSpeakers": 54,
+      "sampleRate": 24000,
+      "wav": "kokoro-gb.wav",
+      "speed": 1,
+      "samples": 54567,
+      "generationSeconds": 2.468644682,
+      "mode": "kokoro-gb",
+      "nonzeroSamples": 54567,
+      "allSamplesFinite": true,
+      "rms": 0.0813214634857671,
+      "text": "The morning sun shines through the window.",
+      "cpuThreads": 2,
+      "lang": "en-gb-x-rp",
+      "lexicon": "lexicon-gb-en.txt",
+      "status": "passed",
+      "independentWavValidation": {
+        "status": "passed",
+        "channels": 1,
+        "sampleWidthBytes": 2,
+        "sampleRate": 24000,
+        "frames": 54567,
+        "nonzeroPcm16Samples": 53187,
+        "peakPcm16": 14482,
+        "bytes": 109178,
+        "sha256": "88330d06482b264f3ba7c0616353b1850618e1509da186f3b2d9c5d245d2ea39"
+      },
+      "modelInputs": [
+        {
+          "filename": "tokens.txt",
+          "bytes": 687,
+          "sha256": "6ebb6bb288f20f3ae8d004d3c2ca27697da27c037d75e81a60e2a6a663f95425"
+        },
+        {
+          "filename": "model.int8.onnx",
+          "bytes": 114203756,
+          "sha256": "4b86207ef680e394d8343bee22dfc4c512e5c707c6d9578e3f35ab09bffd6b36"
+        },
+        {
+          "filename": "voices.bin",
+          "bytes": 28200960,
+          "sha256": "1c5a5b983d3d50d8586d437a51f3faa2da7919ce76a013c081e65671a3447c29"
+        },
+        {
+          "filename": "lexicon-gb-en.txt",
+          "bytes": 6366635,
+          "sha256": "c4cbb37316f62210dff52718a7afcaae24f50c032cc75ab47ae67b831d1049e7"
+        }
+      ],
+      "modelSourceArchive": {
+        "name": "kokoro-int8-multi-lang-v1_0.tar.bz2",
+        "archiveBytes": 132303094,
+        "sha256": "4c3052abaa60943a341f193888cf6abd68787dae6ab8ae5c925a706caa247e4e",
+        "unpackedBytes": 189882497,
+        "entries": 417
+      },
+      "dataDir": "espeak-ng-data",
+      "voiceLabel": "bf_alice"
+    }
+  ],
+  "detectedAndFixedRegression": {
+    "modelId": "kokoro-int8-multi-lang-v1_0",
+    "speakerId": 20,
+    "userVoiceLocale": "en-GB",
+    "originalNativeLang": "en-gb",
+    "lexicon": "lexicon-gb-en.txt",
+    "originalResult": "failed",
+    "originalError": "Failed to set eSpeak-ng voice; native generation returned empty PCM",
+    "originalLogSha256": "bfafa72499c6fbd17077747e9e4e97cb5f1adeadb3479878e1b1be448cefd755",
+    "fixedNativeLang": "en-gb-x-rp",
+    "fixedResult": "passed",
+    "voiceDataFile": "espeak-ng-data/lang/gmw/en-GB-x-rp",
+    "voiceDataLanguage": "en-gb-x-rp",
+    "backendConfigMatchesValidatedFix": true,
+    "backendSourceSha256": "30455c6693f9901aeb325497c031932e9e39c9e2b106b82c71e0b77b469e7f2d",
+    "descriptorLocaleUnchanged": "en-GB"
+  },
+  "previousKittenValidation": {
+    "source": "toolchain/native_test/output/result.json",
+    "sourceSha256": "7c6931fc4a5db1c42bf15c891d66818a9743f88980136d939782077bc65a0c85",
+    "report": {
+      "status": "passed",
+      "boundary": "Real Linux x86_64 JNI model generation; Android runtime and device behavior are untested",
+      "sampleRate": 24000,
+      "numSpeakers": 8,
+      "speakerId": 0,
+      "loadSeconds": 0.642879,
+      "generations": [
+        {
+          "text": "apple",
+          "wav": "bare-word-apple.wav",
+          "samples": 7800,
+          "nonzeroSamples": 7800,
+          "peak": 0.361010224,
+          "rms": 0.084960585,
+          "durationSeconds": 0.325,
+          "generationSeconds": 0.1207,
+          "rtf": 0.371386
+        },
+        {
+          "text": "The morning sun shines through the window.",
+          "wav": "sentence.wav",
+          "samples": 67529,
+          "nonzeroSamples": 67529,
+          "peak": 0.593194366,
+          "rms": 0.116682929,
+          "durationSeconds": 2.813708,
+          "generationSeconds": 1.033706,
+          "rtf": 0.367382
+        }
+      ]
+    }
+  },
+  "externalHostHarness": {
+    "source": "native_model_validation/NativeModelValidation.java",
+    "sha256": "49167c61576c54532a4bb9f7882602a07f9c5bd5a34ef0f45f61f62d5c72c7d9",
+    "fixturePreparation": "production verifyArchive/unpackTar/validateInstalledFiles helpers; source/model/WAV/test classes kept outside project"
+  },
+  "notValidated": [
+    "Android runtime model loading",
+    "actual Android DownloadManager service restart",
+    "phone AudioTrack playback and pause/resume",
+    "phone peak RAM",
+    "phone inference speed",
+    "listening assessment of pronunciation or voice quality"
+  ]
+}

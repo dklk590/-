@@ -123,6 +123,8 @@ public final class SecureSettings {
                 .put("newPerDay", 15).put("sessionSize", 12)
                 .put("ttsRate", 0.85).put("ttsLocale", "en-GB")
                 .put("ttsEngine", "").put("ttsVoice", "")
+                .put("ttsProvider", "system")
+                .put("offlineModelId", "kitten-nano-en-v0_8-int8").put("offlineSpeakerId", 0)
                 .put("readingLength", "short").put("readingDifficulty", "standard").put("readingNewWordCount", 0)
                 .put("reminder", false).put("reminderHour", 20).put("reminderMinute", 0)
                 .put("apiBaseUrl", "").put("apiModel", "").put("apiTimeoutSec", 45)
@@ -151,6 +153,16 @@ public final class SecureSettings {
         if (!(voice instanceof String) || ((String) voice).length() > 300
                 || ((String) voice).matches("(?s).*[\\p{Cntrl}].*"))
             throw new IllegalArgumentException("音色名称无效，请从列表选择。");
+        Object provider = settings.get("ttsProvider");
+        if (!(provider instanceof String) || !((String) provider).matches("system|offline"))
+            throw new IllegalArgumentException("朗读来源请选择系统 TTS 或词链本机模型。");
+        Object modelId = settings.get("offlineModelId");
+        if (!(modelId instanceof String) || ((String) modelId).length() > 120)
+            throw new IllegalArgumentException("本机模型无效，请从目录选择。");
+        ModelCatalog.Entry offlineModel = ModelCatalog.get((String) modelId);
+        int speakerId = requireInt(settings, "offlineSpeakerId", 0, 10000);
+        if (!offlineModel.hasSpeaker(speakerId))
+            throw new IllegalArgumentException("所选模型没有该音色，请从列表选择。");
         if (!(settings.get("readingLength") instanceof String)
                 || !settings.getString("readingLength").matches("short|long"))
             throw new IllegalArgumentException("阅读长度请选择短文或长文。");

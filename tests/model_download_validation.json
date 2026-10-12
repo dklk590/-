@@ -1,0 +1,90 @@
+{
+  "scope": "Pinned official archives + production streaming hash/tar/atomic-install helpers; Android DownloadManager service itself requires device validation.",
+  "result": "passed",
+  "syntheticAndCatalogChecks": 76,
+  "withFourRealArchiveChecks": 80,
+  "pinnedMetadataSource": "https://api.github.com/repos/k2-fsa/sherpa-onnx/releases/tags/tts-models",
+  "verifiedModels": [
+    {
+      "name": "vits-piper-en_GB-alan-medium.tar.bz2",
+      "archiveBytes": 67220121,
+      "sha256": "a48d4017da0f77668b27bed63fe6e04dd64c6397e1fadad4f460efb0ef7c9012",
+      "unpackedBytes": 81199210,
+      "entries": 397,
+      "officialDigest": "sha256:a48d4017da0f77668b27bed63fe6e04dd64c6397e1fadad4f460efb0ef7c9012",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-en_GB-alan-medium.tar.bz2",
+      "sha256MatchesOfficial": true,
+      "linkOrSpecialEntries": 0,
+      "requiredSpeechFilesValidated": true
+    },
+    {
+      "name": "vits-piper-en_US-lessac-medium.tar.bz2",
+      "archiveBytes": 67230653,
+      "sha256": "9e3febfacf0abf4270172d2958bcec246032b7e88efc2720840cc80c93de334e",
+      "unpackedBytes": 81147006,
+      "entries": 397,
+      "officialDigest": "sha256:9e3febfacf0abf4270172d2958bcec246032b7e88efc2720840cc80c93de334e",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-en_US-lessac-medium.tar.bz2",
+      "sha256MatchesOfficial": true,
+      "linkOrSpecialEntries": 0,
+      "requiredSpeechFilesValidated": true
+    },
+    {
+      "name": "kitten-nano-en-v0_8-int8.tar.bz2",
+      "archiveBytes": 31220690,
+      "sha256": "6fa5be852612ce761094ba74ee6123b4fc4acfefa79bf64dc63acae4a83af2fd",
+      "unpackedBytes": 45652547,
+      "entries": 398,
+      "officialDigest": "sha256:6fa5be852612ce761094ba74ee6123b4fc4acfefa79bf64dc63acae4a83af2fd",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kitten-nano-en-v0_8-int8.tar.bz2",
+      "sha256MatchesOfficial": true,
+      "linkOrSpecialEntries": 0,
+      "requiredSpeechFilesValidated": true
+    },
+    {
+      "name": "kokoro-int8-multi-lang-v1_0.tar.bz2",
+      "archiveBytes": 132303094,
+      "sha256": "4c3052abaa60943a341f193888cf6abd68787dae6ab8ae5c925a706caa247e4e",
+      "unpackedBytes": 189882497,
+      "entries": 417,
+      "officialDigest": "sha256:4c3052abaa60943a341f193888cf6abd68787dae6ab8ae5c925a706caa247e4e",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2",
+      "sha256MatchesOfficial": true,
+      "linkOrSpecialEntries": 0,
+      "requiredSpeechFilesValidated": true
+    }
+  ],
+  "negativeCases": [
+    "unknown model/path or user URL",
+    "wrong archive size",
+    "wrong SHA256",
+    "cancelled hash",
+    "../ traversal",
+    "absolute path",
+    "Windows-style paths",
+    "backslash path",
+    "wrong tar root",
+    "symlink",
+    "hardlink",
+    "FIFO/special type",
+    "duplicate overwrite",
+    "expanded-byte limit",
+    "cancelled extraction",
+    "preexisting staging",
+    "failed atomic install preserves previous model"
+  ],
+  "lifecycleDesign": [
+    "Android DownloadManager jobs saved in private preferences survive Activity destruction",
+    "close cancels installer/checker, retains full archive and system download",
+    "next manager queries actual system status and requeues verification/install",
+    "cancel changes per-job token before removal; stale workers cannot commit",
+    "delete first unloads selected speech runtime in caller",
+    "installed files are private and excluded from Android backup",
+    "interrupted install backup is restored if current model directory is absent"
+  ],
+  "notMeasured": [
+    "real phone DownloadManager restart/notification behavior",
+    "phone inference speed",
+    "phone peak RAM"
+  ]
+}

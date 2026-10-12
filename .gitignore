@@ -9,3 +9,4 @@ signing/*.jks
 *.apk
 *.aab
 *.idsig
+app/src/main/jniLibs/**/*.so

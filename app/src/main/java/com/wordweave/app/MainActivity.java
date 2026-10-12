@@ -49,6 +49,7 @@ public class MainActivity extends Activity {
     private SecureSettings settings;
     private AiClient ai;
     private SpeechManager speech;
+    private ModelDownloadManager models;
     private volatile boolean destroyed;
     private String pendingExportId, pendingImportId;
     private JSONObject pendingBackup;
@@ -116,7 +117,9 @@ public class MainActivity extends Activity {
             try { repository.importVocabulary(); }
             catch (Exception ex) { toast("词库加载失败：" + message(ex)); }
         });
-        speech = new SpeechManager(this, settings);
+        models = new ModelDownloadManager(this);
+        speech = new SpeechManager(this, settings, models);
+        speech.setListener(this::publishSpeechStatus);
         web.loadUrl("file:///android_asset/index.html");
         try { ReviewReminder.schedule(this, settings.loadPublic()); } catch (Exception ignored) { }
     }
@@ -199,6 +202,42 @@ public class MainActivity extends Activity {
                             runOnUiThread(() -> { updateReminder(prefs); speech.configure(prefs); });
                             reply(id, true, prefs); break;
                         }
+                        case "modelCatalog": {
+                            models.refreshAll();
+                            reply(id, true, models.catalog()); break;
+                        }
+                        case "modelDownload": reply(id, true, models.start(args.getString("modelId"))); break;
+                        case "modelCancel": reply(id, true, models.cancel(args.getString("modelId"))); break;
+                        case "modelDelete": {
+                            final String modelId = args.getString("modelId");
+                            ModelCatalog.get(modelId); // Validate before scheduling native handle release.
+                            runOnUiThread(() -> {
+                                if (destroyed) return;
+                                try {
+                                    speech.releaseModel(modelId, () -> {
+                                        if (destroyed) return;
+                                        worker.execute(() -> {
+                                            try { reply(id, true, models.delete(modelId)); }
+                                            catch (Exception ex) { error(id, ex); }
+                                            finally { speech.modelDeletionFinished(modelId); }
+                                        });
+                                    });
+                                } catch (Exception ex) { error(id, ex); }
+                            });
+                            break;
+                        }
+                        case "speechPlay": {
+                            long readingId = args.getLong("readingId");
+                            if (readingId <= 0) throw new IllegalArgumentException("请先打开一篇阅读材料。");
+                            JSONObject reading = repository.getReading(readingId);
+                            String text = reading.getString("text");
+                            // Read the saved passage; UI labels and translations are not speech input.
+                            speakRequest(id, text, "reading:" + readingId); break;
+                        }
+                        case "speechPause": speechControl(id, "pause"); break;
+                        case "speechResume": speechControl(id, "resume"); break;
+                        case "speechStop": speechControl(id, "stop"); break;
+                        case "speechStatus": reply(id, true, speech.status()); break;
                         case "speak": {
                             final String text = args.optString("text", "").trim();
                             if (text.isEmpty() || text.length() > 16000) throw new IllegalArgumentException("发音内容为空或过长。");
@@ -324,12 +363,40 @@ public class MainActivity extends Activity {
     }
 
     private void speakRequest(String requestId, String text) {
+        speakRequest(requestId, text, "utterance");
+    }
+
+    private void speakRequest(String requestId, String text, String context) {
         runOnUiThread(() -> {
             try {
                 if (text.trim().isEmpty() || text.length() > 16000) throw new IllegalArgumentException("发音内容为空或过长。");
-                if (!speech.speak(text)) throw new IllegalStateException("语音播放失败，请检查所选引擎和英语语音包。");
-                reply(requestId, true, new JSONObject().put("started", true));
+                if (!speech.speak(text, context))
+                    throw new IllegalStateException(speech.status().optString("message", "所选语音未就绪，请在设置中下载或切换。"));
+                JSONObject status = speech.status();
+                status.put("started", true);
+                reply(requestId, true, status);
             } catch (Exception ex) { error(requestId, ex); }
+        });
+    }
+
+    private void speechControl(String requestId, String operation) {
+        runOnUiThread(() -> {
+            try {
+                if ("pause".equals(operation)) speech.pause();
+                else if ("resume".equals(operation)) speech.resume();
+                else speech.stop();
+                reply(requestId, true, speech.status());
+            } catch (Exception ex) { error(requestId, ex); }
+        });
+    }
+
+    private void publishSpeechStatus(JSONObject status) {
+        if (destroyed) return;
+        // Listener snapshots contain only playback state, never API credentials.
+        final String json = status.toString();
+        runOnUiThread(() -> {
+            if (!destroyed && web != null)
+                web.evaluateJavascript("window.onSpeechStatus&&window.onSpeechStatus(" + json + ")", null);
         });
     }
 
@@ -374,6 +441,7 @@ public class MainActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         if (speech != null) speech.onResume();
+        if (models != null) models.refreshAll();
     }
     private void updateReminder(JSONObject prefs) {
         if (prefs.optBoolean("reminder") && Build.VERSION.SDK_INT >= 33 &&
@@ -439,6 +507,7 @@ public class MainActivity extends Activity {
                         }
                         content = out.toString("UTF-8");
                     }
+                    if (speech != null) speech.stop();
                     repository.importBackup(new JSONObject(content));
                     reply(id, true, new JSONObject().put("message", "学习进度已恢复。"));
                     runOnUiThread(() -> web.evaluateJavascript("window.dispatchEvent(new Event('wordweave:dataChanged'))", null));
@@ -456,6 +525,7 @@ public class MainActivity extends Activity {
         if (activeDialog != null) activeDialog.cancel();
         network.shutdownNow();
         if (speech != null) speech.destroy();
+        if (models != null) models.close();
         if (web != null) { web.removeJavascriptInterface("Android"); web.destroy(); web = null; }
         worker.execute(() -> repository.close());
         worker.shutdown();

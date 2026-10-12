@@ -22,7 +22,7 @@ def main():
     archive = args.output / "词链_WordWeave_完整源码与说明.zip"
     shutil.copyfile(args.apk, apk)
     files = []
-    for directory in ("app/src", "docs", "LICENSES", "gradle", ".github", "scripts", "tests"):
+    for directory in ("app/src", "app/libs", "app/native", "docs", "LICENSES", "gradle", ".github", "scripts", "tests"):
         for path in (ROOT / directory).rglob("*"):
             if not path.is_file():
                 continue
@@ -31,10 +31,12 @@ def main():
                 continue
             if path.suffix in (".pyc", ".class"):
                 continue
-            if path.suffix in (".keystore", ".jks"):
+            if 'jniLibs' in rel.parts and path.suffix == '.so':
+                continue
+            if path.suffix in (".keystore", ".jks", ".p12", ".pfx", ".pem", ".key"):
                 continue
             files.append(path)
-    for name in ("README.md", "build.gradle", "settings.gradle", "gradle.properties", "gradlew", "gradlew.bat", ".gitignore"):
+    for name in ("README.md", "LICENSE", "NOTICE", "dependencies.lock.json", "build.gradle", "settings.gradle", "gradle.properties", "gradlew", "gradlew.bat", ".gitignore"):
         if (ROOT / name).is_file():
             files.append(ROOT / name)
     files.append(ROOT / "app/build.gradle")
@@ -45,6 +47,14 @@ def main():
     with zipfile.ZipFile(archive) as out:
         assert out.testzip() is None
         assert "wordweave_android/app/src/main/assets/vocabulary.json" in out.namelist()
+        assert "wordweave_android/app/libs/sherpa-onnx-android-1.13.8.jar" in out.namelist()
+        assert "wordweave_android/app/native/libsherpa-onnx-jni-arm64-v8a.so.gz" in out.namelist()
+        assert "wordweave_android/app/native/libsherpa-onnx-jni-armeabi-v7a.so.gz" in out.namelist()
+        assert "wordweave_android/dependencies.lock.json" in out.namelist()
+        assert "wordweave_android/LICENSE" in out.namelist()
+        assert "wordweave_android/NOTICE" in out.namelist()
+        assert not any('/jniLibs/' in name and name.endswith('.so') for name in out.namelist())
+        assert not any(name.lower().endswith(('.keystore', '.jks', '.p12', '.pfx', '.pem', '.key', '.class')) for name in out.namelist())
         assert out.read("wordweave_android/安装包/" + apk.name) == apk.read_bytes()
     for path in (apk, archive):
         print(path)

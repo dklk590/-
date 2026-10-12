@@ -10,8 +10,11 @@ android {
         applicationId 'com.wordweave.app'
         minSdk 26
         targetSdk 35
-        versionCode 2
-        versionName '1.1.0'
+        versionCode 3
+        versionName '1.2.0'
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a'
+        }
     }
     signingConfigs {
         debug {
@@ -38,4 +41,76 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    packaging {
+        jniLibs {
+            // Keep native libraries uncompressed so Android can map the 16KB-aligned APK entries.
+            useLegacyPackaging = false
+        }
+    }
+}
+
+dependencies {
+    // Pinned official runtime and libraries are included in source; hashes and licenses are recorded.
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+tasks.register('prepareNativeLibraries') {
+    inputs.file rootProject.file('dependencies.lock.json')
+    inputs.files fileTree(dir: 'native', include: ['*.gz'])
+    outputs.files file('src/main/jniLibs/arm64-v8a/libsherpa-onnx-jni.so'),
+            file('src/main/jniLibs/armeabi-v7a/libsherpa-onnx-jni.so')
+    doLast {
+        def lock = new groovy.json.JsonSlurper().parse(rootProject.file('dependencies.lock.json'))
+        def digestFile = { File input ->
+            def hash = java.security.MessageDigest.getInstance('SHA-256')
+            input.withInputStream { stream ->
+                byte[] buffer = new byte[65536]
+                int count
+                while ((count = stream.read(buffer)) != -1) hash.update(buffer, 0, count)
+            }
+            hash.digest().encodeHex().toString()
+        }
+        lock.nativeArchives.each { entry ->
+            File archive = rootProject.file(entry.archive)
+            File destination = rootProject.file(entry.output)
+            if (!archive.isFile() || archive.length() != entry.archiveBytes ||
+                    digestFile(archive) != entry.archiveSha256)
+                throw new GradleException("Pinned native archive failed validation: ${entry.archive}")
+            if (!(destination.isFile() && destination.length() == entry.rawBytes &&
+                    digestFile(destination) == entry.rawSha256)) {
+                destination.parentFile.mkdirs()
+                File temporary = File.createTempFile('wordweave-native-', '.tmp', destination.parentFile)
+                try {
+                    long expanded = 0
+                    archive.withInputStream { source ->
+                        new java.util.zip.GZIPInputStream(source).withCloseable { gzip ->
+                            temporary.withOutputStream { target ->
+                                byte[] buffer = new byte[65536]
+                                int count
+                                while ((count = gzip.read(buffer)) != -1) {
+                                    expanded += count
+                                    if (expanded > entry.rawBytes)
+                                        throw new GradleException('Native archive exceeds pinned size')
+                                    target.write(buffer, 0, count)
+                                }
+                            }
+                        }
+                    }
+                    if (expanded != entry.rawBytes || digestFile(temporary) != entry.rawSha256)
+                        throw new GradleException("Expanded native library failed validation: ${entry.output}")
+                    try {
+                        java.nio.file.Files.move(temporary.toPath(), destination.toPath(),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                                java.nio.file.StandardCopyOption.ATOMIC_MOVE)
+                    } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+                        java.nio.file.Files.move(temporary.toPath(), destination.toPath(),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                    }
+                } finally { temporary.delete() }
+            }
+        }
+    }
+}
+tasks.named('preBuild').configure {
+    dependsOn tasks.named('prepareNativeLibraries')
 }
