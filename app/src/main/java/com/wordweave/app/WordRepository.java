@@ -41,7 +41,7 @@ public final class WordRepository extends SQLiteOpenHelper {
     private final HashMap<String, Integer> familyWordIds = new HashMap<>();
 
     public WordRepository(Context context) {
-        super(context.getApplicationContext(), "wordweave.db", null, 2);
+        super(context.getApplicationContext(), "wordweave.db", null, 3);
         this.context = context.getApplicationContext();
     }
 
@@ -62,6 +62,7 @@ public final class WordRepository extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE readings (id INTEGER PRIMARY KEY AUTOINCREMENT,created_at INTEGER NOT NULL,payload TEXT NOT NULL)");
         db.execSQL("CREATE TABLE meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)");
         createLearningTables(db);
+        createContextTables(db);
     }
 
     @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -71,7 +72,13 @@ public final class WordRepository extends SQLiteOpenHelper {
             db.execSQL("UPDATE states SET lesson_at=CASE WHEN introduced_at>0 THEN introduced_at WHEN last_reviewed>0 THEN last_reviewed ELSE 1 END WHERE reviews>0");
             createLearningTables(db);
         }
-        if (newVersion > 2) throw new IllegalStateException("Unsupported database upgrade");
+        if (oldVersion < 3 && newVersion >= 3) createContextTables(db);
+        if (newVersion > 3) throw new IllegalStateException("Unsupported database upgrade");
+    }
+
+    private static void createContextTables(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS context_sessions (id INTEGER PRIMARY KEY AUTOINCREMENT,created_at INTEGER NOT NULL,cache_key TEXT NOT NULL,payload TEXT NOT NULL)");
+        db.execSQL("CREATE INDEX IF NOT EXISTS context_materials ON context_sessions(cache_key,id)");
     }
 
     private static void createLearningTables(SQLiteDatabase db) {
@@ -649,6 +656,8 @@ public final class WordRepository extends SQLiteOpenHelper {
         put(backup, "readings", readingHistoryFull());
         put(backup, "learningPacks", cachedRows("learning_packs"));
         put(backup, "choiceCache", cachedRows("choice_cache"));
+        try { put(backup, "contextSessions", ContextLearningRepository.exportSessions(db)); }
+        catch (Exception ex) { throw new IllegalStateException("语境学习记录无法导出", ex); }
         return backup;
     }
 
@@ -661,6 +670,9 @@ public final class WordRepository extends SQLiteOpenHelper {
         JSONArray readings = backup.optJSONArray("readings");
         JSONArray packs = version >= 2 ? backup.optJSONArray("learningPacks") : new JSONArray();
         JSONArray choices = version >= 2 ? backup.optJSONArray("choiceCache") : new JSONArray();
+        JSONArray contexts = backup.optJSONArray("contextSessions");
+        if (backup.has("contextSessions") && contexts == null) throw new IllegalArgumentException("语境学习备份格式无效");
+        if (contexts == null) contexts = new JSONArray();
         if (states == null || log == null || readings == null) throw new IllegalArgumentException("备份缺少学习记录");
         if (packs == null || choices == null) throw new IllegalArgumentException("备份缺少学习缓存");
         if (states.length() > 50000 || log.length() > 1000000 || readings.length() > 20000) throw new IllegalArgumentException("备份过大");
@@ -668,6 +680,8 @@ public final class WordRepository extends SQLiteOpenHelper {
         Set<Integer> validIds = new HashSet<>();
         try (Cursor c = db.rawQuery("SELECT id FROM words", null)) { while (c.moveToNext()) validIds.add(c.getInt(0)); }
         Set<Integer> seenIds = new HashSet<>();
+        try { ContextLearningRepository.validateBackup(contexts, validIds); }
+        catch (Exception ex) { throw new IllegalArgumentException("语境学习备份无效", ex); }
         for (int i = 0; i < states.length(); i++) {
             JSONObject row = states.optJSONObject(i);
             if (row == null || !validIds.contains(row.optInt("wordId")) || !seenIds.add(row.optInt("wordId"))) throw new IllegalArgumentException("备份词条不匹配或重复");
@@ -700,6 +714,8 @@ public final class WordRepository extends SQLiteOpenHelper {
             for (int i = 0; i < readings.length(); i++) saveReading(readings.optJSONObject(i));
             restoreCachedRows("learning_packs", packs, staleCacheWords);
             restoreCachedRows("choice_cache", choices, staleCacheWords);
+            try { ContextLearningRepository.restoreSessions(db, contexts); }
+            catch (Exception ex) { throw new IllegalStateException("语境学习记录恢复失败", ex); }
             newToday(db, System.currentTimeMillis());
             db.setTransactionSuccessful();
         } finally {

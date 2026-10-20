@@ -46,6 +46,7 @@ public class MainActivity extends Activity {
     private final AtomicBoolean aiBusy = new AtomicBoolean(false);
     private WebView web;
     private WordRepository repository;
+    private ContextLearningRepository contextLearning;
     private SecureSettings settings;
     private AiClient ai;
     private SpeechManager speech;
@@ -59,6 +60,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         settings = new SecureSettings(this);
         repository = new WordRepository(this);
+        contextLearning = new ContextLearningRepository(this, repository);
         ai = new AiClient(this);
         FrameLayout container = new FrameLayout(this);
         container.setBackgroundColor(Color.rgb(247, 248, 243));
@@ -139,6 +141,15 @@ public class MainActivity extends Activity {
                             reply(id, true, value); break;
                         }
                         case "dashboard": reply(id, true, repository.dashboard()); break;
+                        case "contextCreate": reply(id, true, contextLearning.create(args.getJSONArray("wordIds"))); break;
+                        case "contextGet": reply(id, true, contextLearning.get(args.getLong("sessionId"))); break;
+                        case "contextVisit": reply(id, true, contextLearning.visit(args.getLong("sessionId"), args.getString("sentenceId"))); break;
+                        case "contextReveal": reply(id, true, contextLearning.reveal(args.getLong("sessionId"), args.getString("sentenceId"))); break;
+                        case "contextWord": reply(id, true, contextLearning.word(args.getLong("sessionId"), args.getString("sentenceId"), args.getString("surface"))); break;
+                        case "contextGrade": reply(id, true, contextLearning.grade(args.getLong("sessionId"), args.getInt("wordId"), args.getInt("grade"), settings.loadPublic().optInt("newPerDay", 15))); break;
+                        case "contextGenerate": runAi(id, () -> generateContext(id, args)); break;
+                        case "contextSentenceAi": runAi(id, () -> explainContextSentence(id, args)); break;
+                        case "contextWordAi": runAi(id, () -> explainContextWord(id, args)); break;
                         case "words": reply(id, true, repository.listWords(args.optString("query", ""),
                                 args.optString("groupId", ""), Math.min(3500, Math.max(1, args.optInt("limit", 150))),
                                 args.optBoolean("learnedOnly", false))); break;
@@ -269,7 +280,9 @@ public class MainActivity extends Activity {
                             JSONObject backup = repository.exportBackup();
                             runOnUiThread(() -> chooseExport(id, backup)); break;
                         }
-                        case "importBackup": runOnUiThread(() -> chooseImport(id)); break;
+                        case "importBackup":
+                            if (aiBusy.get()) throw new IllegalStateException("请等待当前 AI 讲解完成后再恢复备份。");
+                            runOnUiThread(() -> chooseImport(id)); break;
                         default: throw new IllegalArgumentException("未知操作。");
                     }
                 } catch (Exception ex) { error(id, ex); }
@@ -278,6 +291,28 @@ public class MainActivity extends Activity {
     }
 
     private interface AiTask { void run() throws Exception; }
+
+    private void generateContext(String requestId, JSONObject args) throws Exception {
+        JSONObject session = contextLearning.get(args.getLong("sessionId"));
+        JSONObject materials = ai.generateContextLessons(settings.loadInternal(), session.getJSONArray("targetWords"));
+        if (!destroyed) reply(requestId, true, contextLearning.replaceMaterials(session.getLong("id"), session.getLong("revision"), materials));
+    }
+
+    private void explainContextSentence(String requestId, JSONObject args) throws Exception {
+        long id = args.getLong("sessionId"); String sentenceId = args.getString("sentenceId");
+        JSONObject session = contextLearning.get(id), sentence = ContextRules.sentence(session, sentenceId);
+        if (sentence.optBoolean("explainedByAi") || "ai".equals(session.optString("source"))) { reply(requestId, true, contextLearning.reveal(id, sentenceId)); return; }
+        JSONObject explanation = ai.explainContextSentence(settings.loadInternal(), sentence);
+        if (!destroyed) reply(requestId, true, contextLearning.saveSentenceExplanation(id, sentenceId, session.getLong("revision"), explanation));
+    }
+
+    private void explainContextWord(String requestId, JSONObject args) throws Exception {
+        long id = args.getLong("sessionId"); String sentenceId = args.getString("sentenceId"), surface = args.getString("surface");
+        JSONObject existing = contextLearning.word(id, sentenceId, surface), session = existing.getJSONObject("session");
+        if ("ai".equals(existing.optString("source"))) { reply(requestId, true, existing); return; }
+        JSONObject explanation = ai.explainContextWord(settings.loadInternal(), ContextRules.sentence(session, sentenceId), surface, existing.getJSONArray("dictionaryCandidates"));
+        if (!destroyed) reply(requestId, true, contextLearning.saveWordExplanation(id, sentenceId, surface, session.getLong("revision"), explanation));
+    }
     private void runAi(String id, AiTask task) throws Exception {
         if (!aiBusy.compareAndSet(false, true)) throw new IllegalStateException("正在等待 AI 回复，请等本次请求完成。");
         network.execute(() -> {

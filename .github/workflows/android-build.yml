@@ -40,11 +40,12 @@ jobs:
           curl --fail --location --retry 2 https://repo.maven.apache.org/maven2/org/json/json/20240303/json-20240303.jar -o /tmp/wordweave-learning-tests/json.jar
           echo '3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed  /tmp/wordweave-learning-tests/json.jar' | sha256sum -c -
           test_cp="/tmp/wordweave-learning-tests/json.jar:${ANDROID_HOME}/platforms/android-35/android.jar:/tmp/wordweave-learning-tests"
-          javac -source 8 -target 8 -encoding UTF-8 -cp "$test_cp" -d /tmp/wordweave-learning-tests app/src/main/java/com/wordweave/app/VocabularyRules.java app/src/main/java/com/wordweave/app/WordRepository.java app/src/main/java/com/wordweave/app/LearningScheduler.java app/src/main/java/com/wordweave/app/AiClient.java app/src/main/java/com/wordweave/app/SecureSettings.java app/src/main/java/com/wordweave/app/ModelCatalog.java tests/VocabularyRulesTest.java tests/WordChoiceRulesTest.java tests/LearningSchedulerTest.java tests/AiProtocolTest.java
+          javac -source 8 -target 8 -encoding UTF-8 -cp "$test_cp" -d /tmp/wordweave-learning-tests app/src/main/java/com/wordweave/app/VocabularyRules.java app/src/main/java/com/wordweave/app/ContextRules.java app/src/main/java/com/wordweave/app/ContextLearningRepository.java app/src/main/java/com/wordweave/app/WordRepository.java app/src/main/java/com/wordweave/app/LearningScheduler.java app/src/main/java/com/wordweave/app/AiClient.java app/src/main/java/com/wordweave/app/SecureSettings.java app/src/main/java/com/wordweave/app/ModelCatalog.java tests/VocabularyRulesTest.java tests/WordChoiceRulesTest.java tests/LearningSchedulerTest.java tests/AiProtocolTest.java tests/ContextLearningTest.java
           java -cp "$test_cp" com.wordweave.app.VocabularyRulesTest "$PWD"
           java -cp "$test_cp" WordChoiceRulesTest
           java -cp "$test_cp" LearningSchedulerTest
           java -cp "$test_cp" com.wordweave.app.AiProtocolTest "$PWD"
+          java -cp "$test_cp" com.wordweave.app.ContextLearningTest "$PWD"
           python3 -m unittest discover -s tests -p 'test_*.py'
 
       - name: Test offline playback pause and resume state

@@ -12,6 +12,7 @@ v1.1 已运行结果：**66 项检查通过，33 次本地 mock 请求，跳转�
 
 ```bash
 javac -cp /path/to/json-20240303.jar:/path/to/android.jar -d /tmp/wordweave-ai-test \
+  app/src/main/java/com/wordweave/app/ContextRules.java \
   app/src/main/java/com/wordweave/app/VocabularyRules.java \
   app/src/main/java/com/wordweave/app/AiClient.java \
   app/src/main/java/com/wordweave/app/SecureSettings.java \
@@ -22,3 +23,6 @@ java -cp /path/to/json-20240303.jar:/path/to/android.jar:/tmp/wordweave-ai-test 
 ```
 
 Windows 的 classpath 分隔符需由 `:` 改为 `;`。超时检查需要约 10 秒。测试不替代实际服务商兼容性和真机验证；Keystore 加解密、Android 系统 TTS 和通知权限依赖 Android 系统，不能通过普通 Java 主机测试完整验证。
+
+
+语境学习另见`ContextLearningTest.java`，同样使用本地假服务且不需要真实API Key。测试时把`ContextRules.java`、`ContextLearningTest.java`加入上述编译列表，再运行`com.wordweave.app.ContextLearningTest`。界面验证运行`tests/context_learning_ui.mjs`，与旧界面测试共享测试专用`ui_bridge_fixture.mjs`，测试数据不进入应用词库。

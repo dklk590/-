@@ -120,3 +120,14 @@ AI 学习包使用显式的“生成当前及接下来词”按钮，一次最�
 ```
 
 以上示例仅展示单层形状；实际响应每词必须恰好 3 层。接口不能自行缓存，调用方需将 `generateLearningPacks()` 返回的完整数组交给仓储 `saveLearningPacks()`。读取现有缓存是否需要更新由仓储处理。短篇阅读预算 2200 tokens、长篇 3500，译文评价按长短为 3000/5000，学习包按每批词数提升预算、上限 14000；实际费用以服务商计费为准。
+
+
+## v1.4 语境学习
+
+新增本机桥接：`contextCreate(wordIds)`、`contextGet(sessionId)`、`contextVisit(sessionId,sentenceId)`、`contextReveal(sessionId,sentenceId)`、`contextWord(sessionId,sentenceId,surface)`、`contextGrade(sessionId,wordId,grade)`。课程选择1–6个实际词库词条。点词和整句展开由数据库记录；评分不信任界面传入的提示标记，读取课程本身的提示记录。原选择题的`review`协议不变。
+
+显式AI动作：`contextGenerate`为本组生成不同语境，`contextSentenceAi`为当前原句补充译文、结构和朗读提示，`contextWordAi`为所选原词讲解原形、实际词性、语境义、用法和词形。已缓存的同句同词讲解直接返回；新生成语境会清空旧句子的点词列表，保留先前的目标词提示证据。恢复备份期间不接受尚在运行的AI任务交叉写入。
+
+提示词分别为`generate_context_lessons.txt`、`explain_context_sentence.txt`、`explain_context_word.txt`。材料每句必须真实覆盖至少一个目标词；AI材料要求每个目标词至少覆盖两个不同情境，重复句、伪造词条编号、正文夹带中文和漏掉目标词会被拒绝。输入词及已有词形来自原词库，AI不能替换权威词条。整句解析必须回显原句，单词解析必须回显句中实际词，中文释义与解释均有长度限制。
+
+课程、词语讲解、已读状态和逐词评价随`contextSessions`一起备份；导入旧备份时该字段可缺省。API地址和Key仍不进入学习备份。

@@ -72,8 +72,8 @@ def main():
     output.parent.mkdir(parents=True, exist_ok=True)
     run([aapt, 'compile', '--dir', source_root / 'res', '-o', resources_zip])
     run([aapt, 'link', '-I', android_jar, '--manifest', direct_manifest,
-         '--min-sdk-version', '26', '--target-sdk-version', '35', '--version-code', '4',
-         '--version-name', '1.3.0', '--auto-add-overlay', '-R', resources_zip,
+         '--min-sdk-version', '26', '--target-sdk-version', '35', '--version-code', '5',
+         '--version-name', '1.4.0', '--auto-add-overlay', '-R', resources_zip,
          '-A', source_root / 'assets', '--java', build / 'generated', '-o', unsigned])
     sources = sorted((source_root / 'java').rglob('*.java')) + sorted((build / 'generated').rglob('*.java'))
     if not sources:

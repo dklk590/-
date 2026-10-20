@@ -10,7 +10,8 @@ SOURCE = (ROOT / "app/src/main/java/com/wordweave/app/WordRepository.java").read
 CREATE_BODY = re.search(r'void onCreate\([^)]*\) \{(.*?)\n    \}', SOURCE, re.S).group(1)
 CACHE_BODY = re.search(r'void createLearningTables\([^)]*\) \{(.*?)\n    \}', SOURCE, re.S).group(1)
 UPGRADE_BODY = re.search(r'void onUpgrade\([^)]*\) \{(.*?)\n    \}', SOURCE, re.S).group(1)
-DDL = re.findall(r'db\.execSQL\("([^"\n]*)"\)', CREATE_BODY + CACHE_BODY)
+CONTEXT_BODY = re.search(r'void createContextTables\([^)]*\) \{(.*?)\n    \}', SOURCE, re.S).group(1)
+DDL = re.findall(r'db\.execSQL\("([^"\n]*)"\)', CREATE_BODY + CACHE_BODY + CONTEXT_BODY)
 MIGRATIONS = re.findall(r'db\.execSQL\("([^"\n]*)"\)', UPGRADE_BODY)
 DUE_QUERY = re.findall(r'String sql = "([^"\n]*)";', SOURCE)[1]
 NEW_QUERY = re.search(r'String fresh = "([^"\n]*)";', SOURCE).group(1)
@@ -38,6 +39,35 @@ class RepositorySqlTest(unittest.TestCase):
             self.db.execute("INSERT INTO states VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             (word_id, stage, 0, 0, 1, 0, 2.5, 1.0, due, 600, 600, 0, 0, 600))
         self.db.commit()
+
+    def test_context_upgrade_keeps_existing_progress(self):
+        before = self.db.execute("SELECT * FROM states ORDER BY word_id").fetchall()
+        self.db.execute("DROP TABLE context_sessions")
+        for statement in re.findall(r'db\.execSQL\("([^"\n]*)"\)', CONTEXT_BODY):
+            self.db.execute(statement)
+        self.assertEqual(before, self.db.execute("SELECT * FROM states ORDER BY word_id").fetchall())
+        self.assertEqual(self.db.execute("SELECT COUNT(*) FROM context_sessions").fetchone()[0], 0)
+
+    def test_context_grade_and_lesson_payload_rollback_together(self):
+        payload = {"id": 1, "targetWords": [{"id": 1}], "grades": {}, "hints": {"1": True},
+                   "viewed": {"s1": 1}, "unknownWords": [{"surface": "word1", "sentenceId": "s1"}]}
+        self.db.execute("INSERT INTO context_sessions VALUES(?,?,?,?)", (1, 600, "context-v1:[1]", json.dumps(payload)))
+        self.db.execute("CREATE TRIGGER reject_context_update BEFORE UPDATE ON context_sessions BEGIN SELECT RAISE(ABORT,'disk-write-failure'); END")
+        self.db.commit()
+        before = self.db.execute("SELECT reviews,due_at FROM states WHERE word_id=1").fetchone()
+        self.db.execute("BEGIN")
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.execute("UPDATE states SET reviews=reviews+1,due_at=2000 WHERE word_id=1")
+            self.db.execute("INSERT INTO learning_log(word_id,grade,mode,reviewed_at,interval_days,stage) VALUES(1,1,0,1000,1,0)")
+            payload["grades"]["1"] = 1
+            self.db.execute("UPDATE context_sessions SET payload=? WHERE id=1", (json.dumps(payload),))
+        self.db.rollback()
+        self.assertEqual(before, self.db.execute("SELECT reviews,due_at FROM states WHERE word_id=1").fetchone())
+        self.assertEqual(self.db.execute("SELECT COUNT(*) FROM learning_log").fetchone()[0], 0)
+        saved = json.loads(self.db.execute("SELECT payload FROM context_sessions WHERE id=1").fetchone()[0])
+        self.assertEqual(saved["grades"], {})
+        self.assertEqual(saved["hints"], {"1": True})
+        self.assertEqual(saved["unknownWords"][0]["surface"], "word1")
 
     def tearDown(self):
         self.db.close()

@@ -41,6 +41,23 @@ public final class AiClient {
     // Package-private host-test seam: networking and parsing still execute the real production code.
     AiClient(PromptSource source) { this.promptSource = source; }
 
+    public JSONObject generateContextLessons(JSONObject settings, JSONArray words) throws Exception {
+        validateWords(words, 1, 6, true);
+        JSONObject raw = chat(settings, prompt("generate_context_lessons.txt"), new JSONObject().put("words", words).toString(), 9000);
+        return ContextRules.validateMaterials(raw, words, true);
+    }
+
+    public JSONObject explainContextSentence(JSONObject settings, JSONObject sentence) throws Exception {
+        JSONObject raw = chat(settings, prompt("explain_context_sentence.txt"), new JSONObject().put("sentence", sentence.getString("text")).toString(), 2200);
+        return ContextRules.validateExplanation(raw, sentence);
+    }
+
+    public JSONObject explainContextWord(JSONObject settings, JSONObject sentence, String surface, JSONArray dictionary) throws Exception {
+        ContextRules.selectedToken(sentence.getString("text"), surface);
+        JSONObject data = new JSONObject().put("sentence", sentence.getString("text")).put("surface", surface).put("dictionaryCandidates", dictionary);
+        return ContextRules.validateWordExplanation(chat(settings, prompt("explain_context_word.txt"), data.toString(), 1400), sentence, surface);
+    }
+
     public JSONObject generate(JSONObject settings, JSONArray targetWords) throws Exception {
         return generate(settings, targetWords, new JSONArray(),
                 new JSONObject().put("length", "short").put("difficulty", "standard").put("newWordCount", 0));
