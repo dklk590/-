@@ -15,6 +15,7 @@ javac -cp /path/to/json-20240303.jar:/path/to/android.jar -d /tmp/wordweave-ai-t
   app/src/main/java/com/wordweave/app/VocabularyRules.java \
   app/src/main/java/com/wordweave/app/AiClient.java \
   app/src/main/java/com/wordweave/app/SecureSettings.java \
+  app/src/main/java/com/wordweave/app/ModelCatalog.java \
   tests/AiProtocolTest.java
 java -cp /path/to/json-20240303.jar:/path/to/android.jar:/tmp/wordweave-ai-test \
   com.wordweave.app.AiProtocolTest "$PWD"
