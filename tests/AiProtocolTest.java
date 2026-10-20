@@ -105,6 +105,15 @@ public final class AiProtocolTest {
             check(packs.getJSONObject(2).getJSONArray("meanings").getString(0).equals("欣赏；理解"), "dictionary full meanings preserved despite model alterations");
             check(packs.getJSONObject(0).getJSONArray("tiers").length() == 3
                     && packs.getJSONObject(0).getJSONArray("tiers").getJSONObject(2).getJSONArray("options").length() == 4, "three four-choice tiers");
+            JSONArray detailed = new JSONArray().put(word("adapt", "v. 适应；调整；改编\n补充词典义项：\nv. 使适合", "v."));
+            JSONObject detailedPack = client.generateLearningPacks(settings, detailed).getJSONObject(0);
+            check(detailedPack.getJSONArray("meanings").getString(0).equals(detailed.getJSONObject(0).getString("meaning")), "full dictionary survives concise practice");
+            JSONObject firstTier = detailedPack.getJSONArray("tiers").getJSONObject(0);
+            check(firstTier.getJSONArray("options").getJSONObject(0).getString("text").equals("v. 适应；调整"), "correct choice has no extra dictionary giveaway");
+            mode = "packSimilarGist";
+            fails(() -> client.generateLearningPacks(settings, new JSONArray().put(word("increase", "v. 增加", "v."))), "synonymous gist without identical wording rejected");
+            mode = "packEditorialAnswer";
+            fails(() -> client.generateLearningPacks(settings, detailed), "full dictionary editorial disclosure rejected");
             mode = "packMissing";
             fails(() -> client.generateLearningPacks(settings, words), "missing batch word rejected");
             mode = "packWrongMeaning";
@@ -266,8 +275,10 @@ public final class AiProtocolTest {
                 for (int option = 0; option < 4; option++) {
                     String id = new String[]{"A", "B", "C", "D"}[option];
                     int distractorLevel = current.equals("packRepeatedTier") ? 1 : level;
-                    String text = id.equals(correct) ? word.getString("meaning") : "测试错误概念" + distractorLevel + "之" + option;
+                    String text = id.equals(correct) ? word.getString("choiceMeaning") : new String[][]{{"河流", "桥梁", "天空", "湖泊"}, {"灯塔", "音乐", "石头", "树木"}, {"邮票", "粮食", "证据", "车站"}}[distractorLevel - 1][option];
                     if (current.equals("packWrongMeaning") && id.equals(correct)) text = "被模型误改的释义";
+                    if (current.equals("packSimilarGist") && !id.equals(correct)) text = "v. 提高";
+                    if (current.equals("packEditorialAnswer") && id.equals(correct)) text = word.getString("meaning");
                     if (current.equals("packTrueSubmeaning") && !id.equals(correct)) text = word.getString("meaning").split("；")[0];
                     if (current.equals("packDuplicateOptions") && !id.equals(correct)) text = "完全相同错误概念";
                     options.put(new JSONObject().put("id", id).put("text", text));
@@ -276,7 +287,7 @@ public final class AiProtocolTest {
                 if (current.equals("packRepeatedTier")) {
                     correct = "A";
                     for (int option = 0; option < 4; option++) options.getJSONObject(option).put("text", option == 0
-                            ? word.getString("meaning") : "测试错误概念一之" + option);
+                            ? word.getString("choiceMeaning") : new String[]{"河流", "桥梁", "天空", "湖泊"}[option]);
                 }
                 tiers.put(new JSONObject().put("level", level)
                         .put("question", current.equals("packWrongQuestion") ? "该词在本句中的义项是哪项？" : "选出该词完整且准确的词典义项。")

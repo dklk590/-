@@ -6,12 +6,13 @@ v1.1 已运行结果：**66 项检查通过，33 次本地 mock 请求，跳转�
 
 覆盖短篇/长篇、三档难度、最多 8 个复习词加 8 个额外目标词、精确数量与集合校验、旧重载默认值、提前去除模型附带译文、提交后评价、真实原文/译文引用、分数范围、空译文、缺失目标词、中文泄漏、JSON 代码块和错误 JSON，以及 401/429/503、重定向、响应大小、读取超时、地址与请求头限制。
 
-新增批量学习包验证：按输入词顺序返回、完整字典义项来源不变、三层四选项、缺词/伪造 ID 拒绝、正确释义删改拒绝、真实子义项干扰拒绝、重复选项/重复层拒绝、例句没有完整目标词拒绝、完整义项题与例句单义题混用拒绝、解释引用固定字母位置拒绝（含中文相连的标签），以便界面安全洗牌。
+新增批量学习包验证：按输入词顺序返回、完整字典义项来源不变、三层四选项、缺词/伪造 ID 拒绝、给定简短大意删改拒绝、真实子义项干扰拒绝、重复选项/重复层拒绝、例句没有完整目标词拒绝、完整义项题与例句单义题混用拒绝、解释引用固定字母位置拒绝（含中文相连的标签），以便界面安全洗牌。
 
 复现需 Java 17、Android 35 的 `android.jar` 及主机测试用的 [org.json](https://repo.maven.apache.org/maven2/org/json/json/20240303/json-20240303.jar)。该 JAR 仅为主机运行提供 JSON 实现，**不会打进 APK**。Android 自带 `org.json`，正式构建仍没有外部 Java 依赖。
 
 ```bash
 javac -cp /path/to/json-20240303.jar:/path/to/android.jar -d /tmp/wordweave-ai-test \
+  app/src/main/java/com/wordweave/app/VocabularyRules.java \
   app/src/main/java/com/wordweave/app/AiClient.java \
   app/src/main/java/com/wordweave/app/SecureSettings.java \
   tests/AiProtocolTest.java

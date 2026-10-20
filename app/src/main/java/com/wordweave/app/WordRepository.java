@@ -26,8 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /** Local-only word data and progress. All bulk calls should run off the UI thread. */
 public final class WordRepository extends SQLiteOpenHelper {
@@ -39,7 +37,8 @@ public final class WordRepository extends SQLiteOpenHelper {
     private final Context context;
     private JSONObject offlineLessons;
     private final HashMap<Integer, JSONObject> meaningSupplements = new HashMap<>();
-    private static final Pattern HAN_PATTERN = Pattern.compile("[\\p{IsHan}]+");
+    private final HashMap<String, Set<String>> rootLinks = new HashMap<>();
+    private final HashMap<String, Integer> familyWordIds = new HashMap<>();
 
     public WordRepository(Context context) {
         super(context.getApplicationContext(), "wordweave.db", null, 2);
@@ -115,6 +114,7 @@ public final class WordRepository extends SQLiteOpenHelper {
         }
         if (scalar(db, "SELECT COUNT(*) FROM words", null) > 0) {
             if (!fingerprint.equals(metaValue(db, "dictionaryAssetFingerprint"))) syncDictionary(db, words, fingerprint);
+            refreshLearningPolicy(db);
             return;
         }
         JSONArray groups = data.optJSONArray("groups");
@@ -172,6 +172,21 @@ public final class WordRepository extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
+        refreshLearningPolicy(db);
+    }
+
+    /** Invalidate derived questions after a policy change, retaining all learning records. */
+    private void refreshLearningPolicy(SQLiteDatabase db) {
+        rootLinks.clear(); familyWordIds.clear();
+        String version = String.valueOf(VocabularyRules.POLICY_VERSION);
+        if (version.equals(metaValue(db, "learningPolicyVersion"))) return;
+        db.beginTransaction();
+        try {
+            db.delete("choice_cache", null, null);
+            db.delete("learning_packs", null, null);
+            putMeta(db, "learningPolicyVersion", version);
+            db.setTransactionSuccessful();
+        } finally { db.endTransaction(); }
     }
 
     public synchronized JSONObject getWord(int wordId) {
@@ -422,6 +437,7 @@ public final class WordRepository extends SQLiteOpenHelper {
             put(example, "en", offline.optString("example", ""));
             put(example, "zh", offline.optString("exampleTranslation", ""));
             usage = offline.optString("usage", "");
+            if ("结合本句与对照译文理解语境用法；上方词条保留完整义项。".equals(usage)) usage = "";
             put(example, "usage", usage);
             put(example, "source", offline.optString("source", "离线例句"));
             put(word, "source", "local"); put(word, "aiCached", false);
@@ -434,7 +450,60 @@ public final class WordRepository extends SQLiteOpenHelper {
         JSONArray examples = new JSONArray();
         if (!example.optString("en", "").trim().isEmpty()) examples.put(example);
         put(word, "examples", examples);
+        put(word, "familyWords", rootFamily(wordId, false));
         return word;
+    }
+
+    /** Joined spelling exercises include introduced relatives, without advancing their schedules. */
+    public synchronized JSONObject getSpellingExercise(int wordId) {
+        JSONObject exercise = new JSONObject();
+        put(exercise, "wordId", wordId);
+        put(exercise, "policyVersion", VocabularyRules.POLICY_VERSION);
+        put(exercise, "words", rootFamily(wordId, true));
+        return exercise;
+    }
+
+    private JSONArray rootFamily(int wordId, boolean introducedOnly) {
+        JSONObject target = requireWord(wordId);
+        if (familyWordIds.isEmpty()) {
+            try (Cursor c = getReadableDatabase().rawQuery("SELECT id,word,relations FROM words ORDER BY id", null)) {
+                while (c.moveToNext()) {
+                    String name = c.getString(1).toLowerCase(Locale.ROOT);
+                    familyWordIds.put(name, c.getInt(0));
+                    rootLinks.computeIfAbsent(name, key -> new HashSet<>());
+                    for (String related : VocabularyRules.rootWords(c.getString(2))) {
+                        rootLinks.get(name).add(related);
+                        rootLinks.computeIfAbsent(related, key -> new HashSet<>()).add(name);
+                    }
+                }
+            }
+        }
+        Set<String> seen = new HashSet<>(); ArrayDeque<String> pending = new ArrayDeque<>();
+        String name = target.optString("word").toLowerCase(Locale.ROOT);
+        pending.add(name); seen.add(name);
+        while (!pending.isEmpty()) {
+            Set<String> links = rootLinks.get(pending.removeFirst());
+            if (links != null) for (String related : links) {
+                if (familyWordIds.containsKey(related) && seen.add(related)) pending.addLast(related);
+            }
+        }
+        ArrayList<Integer> ids = new ArrayList<>();
+        for (String related : seen) {
+            Integer id = familyWordIds.get(related);
+            if (id != null && id != wordId) ids.add(id);
+        }
+        Collections.sort(ids); ids.add(0, wordId);
+        JSONArray words = new JSONArray();
+        for (Integer id : ids) {
+            JSONObject word = requireWord(id);
+            JSONObject state = word.optJSONObject("state");
+            if (introducedOnly && id != wordId && (state == null || state.optLong("lessonAt") == 0 && state.optInt("reviews") == 0)) continue;
+            JSONObject entry = new JSONObject();
+            for (String field : new String[]{"id", "word", "meaning", "pos", "ipa", "forms"}) put(entry, field, word.opt(field));
+            put(entry, "cue", VocabularyRules.choiceMeaning(word.optString("meaning")));
+            words.put(entry);
+        }
+        return words;
     }
 
     /** Exposure confirmation is idempotent; it is never scored as independent recall. */
@@ -829,33 +898,33 @@ public final class WordRepository extends SQLiteOpenHelper {
 
     private JSONObject localChoice(JSONObject target, int tier) {
         final int targetId = target.optInt("id");
-        String meaning = target.optString("meaning");
+        String fullMeaning = target.optString("meaning");
+        String meaning = VocabularyRules.choiceMeaning(fullMeaning);
         String word = target.optString("word");
         String pos = target.optString("pos");
         String group = target.optString("groupId");
-        Set<String> targetTokens = senseTokens(meaning);
-        String normalizedTarget = normalMeaning(meaning);
+        Set<String> relatedWords = VocabularyRules.relatedWords(target.optString("relations"), false);
         ArrayList<ChoiceCandidate> candidates = new ArrayList<>();
-        try (Cursor c = getReadableDatabase().rawQuery("SELECT id,word,meaning,pos,group_id FROM words WHERE id<>? ORDER BY id", new String[]{String.valueOf(targetId)})) {
+        try (Cursor c = getReadableDatabase().rawQuery("SELECT id,word,meaning,pos,group_id,relations FROM words WHERE id<>? ORDER BY id", new String[]{String.valueOf(targetId)})) {
             while (c.moveToNext()) {
                 String otherMeaning = c.getString(2);
-                if (normalizedTarget.equals(normalMeaning(otherMeaning)) || overlapTokens(targetTokens, senseTokens(otherMeaning))) continue;
+                if (meaningsOverlap(fullMeaning, otherMeaning) || relatedWords.contains(c.getString(1).toLowerCase(Locale.ROOT))
+                        || VocabularyRules.relatedWords(c.getString(5), false).contains(word.toLowerCase(Locale.ROOT))) continue;
                 boolean samePos = pos.equals(c.getString(3));
                 boolean sameGroup = group.equals(c.getString(4));
-                int stem = commonPrefix(word.toLowerCase(Locale.ROOT), c.getString(1).toLowerCase(Locale.ROOT));
-                int score = tier == 1 ? (samePos ? 0 : 20) + (sameGroup ? 0 : 10)
-                        : tier == 2 ? (samePos ? 30 : 0) + (sameGroup ? 5 : 0)
-                        : (samePos ? 30 : 0) + (sameGroup ? 40 : 0) + Math.min(12, stem * 3);
+                int score = (tier == 1 ? (samePos ? 0 : 20) : (samePos ? 30 : 0)) + (sameGroup ? 0 : 10);
                 // Stable dispersion within a score band prevents every word sharing
                 // the same three distractors while keeping cached questions reproducible.
                 score = score * 1000 + Math.floorMod(c.getInt(0) * 1103 + targetId * 97 + tier * 31, 997);
-                candidates.add(new ChoiceCandidate(c.getInt(0), c.getString(1), otherMeaning, score));
+                candidates.add(new ChoiceCandidate(c.getInt(0), c.getString(1), VocabularyRules.choiceMeaning(otherMeaning), score));
             }
         }
         Collections.sort(candidates, Comparator.comparingInt((ChoiceCandidate c) -> c.score).reversed());
         ArrayList<String> wrong = new ArrayList<>(); Set<String> unique = new HashSet<>(); unique.add(normalMeaning(meaning));
         for (ChoiceCandidate c : candidates) {
-            if (unique.add(normalMeaning(c.meaning))) wrong.add(c.meaning);
+            boolean overlap = false;
+            for (String chosen : wrong) if (meaningsOverlap(chosen, c.meaning)) { overlap = true; break; }
+            if (!c.meaning.isEmpty() && !overlap && unique.add(normalMeaning(c.meaning))) wrong.add(c.meaning);
             if (wrong.size() == 3) break;
         }
         if (wrong.size() < 3) throw new IllegalStateException("无法找到三个无歧义的本地干扰义项");
@@ -867,44 +936,20 @@ public final class WordRepository extends SQLiteOpenHelper {
         }
         JSONObject choice = new JSONObject();
         put(choice, "wordId", targetId); put(choice, "word", word); put(choice, "level", tier); put(choice, "tier", tier);
-        put(choice, "question", "选出 “" + word + "” 完整且准确的词典义项。");
+        put(choice, "question", VocabularyRules.CHOICE_QUESTION);
+        put(choice, "policyVersion", VocabularyRules.POLICY_VERSION);
         put(choice, "options", options); put(choice, "answer", String.valueOf((char) ('A' + answerIndex)));
-        put(choice, "explanation", "正确义项：" + meaning + "\n关系提示：" + target.optString("relations", ""));
+        put(choice, "explanation", "词义：" + meaning);
         return choice;
-    }
-
-    private static int commonPrefix(String a, String b) {
-        int n = 0; while (n < a.length() && n < b.length() && a.charAt(n) == b.charAt(n)) n++;
-        return n;
     }
 
     private static int choiceAnswerIndex(int wordId, int tier) { return Math.floorMod(wordId + tier - 1, 4); }
 
     private static String normalMeaning(String text) { return text == null ? "" : text.replaceAll("\\s+", "").trim(); }
 
-    /** Conservative lexical overlap guard; semantic nuance remains AI-assisted. */
+    /** Gist-equivalent and lexically overlapping meanings are excluded from distractors. */
     private static boolean meaningsOverlap(String a, String b) {
-        if (normalMeaning(a).equals(normalMeaning(b))) return true;
-        Set<String> left = senseTokens(a); Set<String> right = senseTokens(b);
-        return overlapTokens(left, right);
-    }
-
-    private static boolean overlapTokens(Set<String> left, Set<String> right) {
-        for (String x : left) for (String y : right) {
-            if (x.equals(y)) return true;
-            if (x.length() >= 2 && y.length() >= 2 && (x.contains(y) || y.contains(x))) return true;
-        }
-        return false;
-    }
-
-    private static Set<String> senseTokens(String text) {
-        Set<String> tokens = new HashSet<>();
-        Matcher matcher = HAN_PATTERN.matcher(text == null ? "" : text);
-        while (matcher.find()) {
-            String token = matcher.group().replaceFirst("^使", "").replaceFirst("的$", "");
-            if (!token.isEmpty() && !"的".equals(token) && !"地".equals(token) && !"等".equals(token) && !"人名".equals(token)) tokens.add(token);
-        }
-        return tokens;
+        return VocabularyRules.meaningsOverlap(a, b);
     }
 
     private JSONObject validatePack(JSONObject supplied, JSONObject word) {
@@ -926,6 +971,7 @@ public final class WordRepository extends SQLiteOpenHelper {
         }
         if (stale) throw new StaleDictionaryCacheException("学习包的词义已更新，请重新生成");
         put(pack, "word_id", id); put(pack, "word", word.optString("word"));
+        put(pack, "policyVersion", VocabularyRules.POLICY_VERSION);
         put(pack, "meanings", new JSONArray().put(word.optString("meaning"))); put(pack, "tiers", validated);
         return pack;
     }
@@ -945,7 +991,18 @@ public final class WordRepository extends SQLiteOpenHelper {
             if (!letter.matches("[A-D]") || !letters.add(letter) || text.isEmpty() || text.length() > 4000 || !texts.add(normalMeaning(text))) throw new IllegalArgumentException("四个选项须唯一且非空");
             if (letter.equals(answer)) correct = text;
         }
-        if (!normalMeaning(word.optString("meaning")).equals(normalMeaning(correct))) throw new StaleDictionaryCacheException("正确选项必须保留完整词典义项");
+        String expected = VocabularyRules.choiceMeaning(word.optString("meaning"));
+        if (!normalMeaning(expected).equals(normalMeaning(correct))) throw new StaleDictionaryCacheException("词义练习已更新，请重新准备题目");
+        ArrayList<String> distractors = new ArrayList<>();
+        for (int i = 0; i < options.length(); i++) {
+            JSONObject option = options.optJSONObject(i); String text = option.optString("text");
+            if (text.contains("\n") || text.matches(".*(?:补充词典|常用义补充).*") || text.length() > 160) throw new IllegalArgumentException("选项应为简短词义");
+            if (answer.equals(option.optString("id"))) continue;
+            boolean overlap = meaningsOverlap(word.optString("meaning"), text);
+            for (String other : distractors) if (meaningsOverlap(other, text)) overlap = true;
+            if (overlap) throw new IllegalArgumentException("选项意思过于接近，请重新准备题目");
+            distractors.add(text);
+        }
         JSONArray ordered = new JSONArray();
         for (char letter = 'A'; letter <= 'D'; letter++) for (int i = 0; i < 4; i++) {
             JSONObject option = options.optJSONObject(i);
@@ -953,7 +1010,8 @@ public final class WordRepository extends SQLiteOpenHelper {
         }
         put(choice, "options", ordered);
         put(choice, "level", tier); put(choice, "tier", tier); put(choice, "wordId", word.optInt("id")); put(choice, "word", word.optString("word"));
-        if (choice.optString("question").trim().isEmpty()) put(choice, "question", "选出该词完整且准确的词典义项。");
+        put(choice, "question", VocabularyRules.CHOICE_QUESTION);
+        put(choice, "policyVersion", VocabularyRules.POLICY_VERSION);
         return choice;
     }
 
@@ -989,6 +1047,7 @@ public final class WordRepository extends SQLiteOpenHelper {
             int id = row == null ? 0 : row.optInt("wordId");
             if (row == null || !validIds.contains(id) || !seenPacks.add(id) || row.optLong("cachedAt", -1) < 0 || !"ai".equals(row.optString("source"))) throw new IllegalArgumentException("备份学习包无效");
             JSONObject payload = row.optJSONObject("payload"); if (payload == null) throw new IllegalArgumentException("备份学习包内容缺失");
+            if (payload.optInt("policyVersion") != VocabularyRules.POLICY_VERSION) { staleWords.add(id); continue; }
             try { put(row, "payload", validatePack(payload, requireWord(id))); }
             catch (StaleDictionaryCacheException stale) { staleWords.add(id); }
         }
@@ -997,6 +1056,9 @@ public final class WordRepository extends SQLiteOpenHelper {
             int id = row == null ? 0 : row.optInt("wordId"); int tier = row == null ? 0 : row.optInt("tier");
             String source = row == null ? "" : row.optString("source");
             if (row == null || !validIds.contains(id) || tier < 1 || tier > 3 || !seenChoices.add(id + ":" + tier) || row.optLong("cachedAt", -1) < 0 || (!"ai".equals(source) && !"local".equals(source))) throw new IllegalArgumentException("备份选项缓存无效");
+            JSONObject payload = row.optJSONObject("payload");
+            if (payload == null) throw new IllegalArgumentException("备份选项内容缺失");
+            if (payload.optInt("policyVersion") != VocabularyRules.POLICY_VERSION) { staleWords.add(id); continue; }
             try { put(row, "payload", validateChoice(row.optJSONObject("payload"), requireWord(id), tier)); }
             catch (StaleDictionaryCacheException stale) { staleWords.add(id); }
         }

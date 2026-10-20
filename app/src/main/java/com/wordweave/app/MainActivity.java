@@ -155,6 +155,7 @@ public class MainActivity extends Activity {
                                     : repository.getQueue(mode, limit, newLimit)); break;
                         }
                         case "lessonGet": reply(id, true, repository.getLesson(args.getInt("wordId"))); break;
+                        case "spellingGet": reply(id, true, repository.getSpellingExercise(args.getInt("wordId"))); break;
                         case "lessonComplete": {
                             int wordId = args.getInt("wordId");
                             LearningScheduler.State state = repository.getState(wordId);

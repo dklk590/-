@@ -127,8 +127,14 @@ public final class AiClient {
     /** One explicit paid batch; the repository decides which future-word packs are uncached. */
     public JSONArray generateLearningPacks(JSONObject settings, JSONArray words) throws Exception {
         validateWords(words, 1, 8, true);
+        JSONArray learningWords = new JSONArray();
+        for (int i = 0; i < words.length(); i++) {
+            JSONObject entry = new JSONObject(words.getJSONObject(i).toString());
+            entry.put("choiceMeaning", VocabularyRules.choiceMeaning(entry.getString("meaning")));
+            learningWords.put(entry);
+        }
         JSONObject answer = chat(settings, prompt("generate_learning_packs.txt"),
-                new JSONObject().put("words", words).toString(), Math.min(14000, 1200 + words.length() * 1600));
+                new JSONObject().put("words", learningWords).toString(), Math.min(14000, 1200 + words.length() * 1600));
         JSONArray generated = requiredArray(answer, "packs", words.length(), words.length());
         java.util.Map<Integer, JSONObject> dictionary = new java.util.HashMap<>();
         for (int i = 0; i < words.length(); i++) dictionary.put(integerValue(words.getJSONObject(i), "id", 1, Integer.MAX_VALUE), words.getJSONObject(i));
@@ -142,6 +148,7 @@ public final class AiClient {
             String word = original.getString("word");
             if (!word.equalsIgnoreCase(requiredString(pack, "word", 100))) throw new Exception("AI 学习包拼写与词条不一致。");
             String fullMeaning = original.getString("meaning");
+            String practiceMeaning = VocabularyRules.choiceMeaning(fullMeaning);
             JSONObject example = pack.optJSONObject("example");
             if (example == null) throw new Exception("AI 学习包缺少自然例句。");
             String en = requiredString(example, "en", 900);
@@ -161,7 +168,7 @@ public final class AiClient {
                 if (tiersByLevel.containsKey(level)) throw new Exception("AI 选择题层级重复。");
                 String question = requiredString(tier, "question", 500);
                 if (!HAN.matcher(question).find() || question.contains("语境") || question.contains("句中") || question.contains("本句"))
-                    throw new Exception("AI 选择题应询问完整词典义项，不能混为例句单义题。");
+                    throw new Exception("AI 选择题应询问单词大意。");
                 String correct = requiredString(tier, "answer", 1);
                 if (!correct.matches("[ABCD]")) throw new Exception("AI 选择题答案必须为 A、B、C 或 D。");
                 JSONArray options = requiredArray(tier, "options", 4, 4);
@@ -173,17 +180,20 @@ public final class AiClient {
                     JSONObject option = options.optJSONObject(k);
                     if (option == null) throw new Exception("AI 选择题选项格式不正确。");
                     String optionId = requiredString(option, "id", 1);
-                    String optionText = requiredString(option, "text", 7000);
+                    String optionText = requiredString(option, "text", 160);
+                    if (optionText.contains("\n") || optionText.matches(".*(?:补充词典|常用义补充).*")) throw new Exception("AI 选项应为简短词义。");
                     String normalized = normalizeMeaning(optionText);
                     if (!optionId.matches("[ABCD]") || !ids.add(optionId) || !texts.add(normalized)
                             || !HAN.matcher(optionText).find()) throw new Exception("AI 选择题选项须为四个不同的中文义项。");
                     if (optionId.equals(correct)) {
-                        if (!normalized.equals(normalizeMeaning(fullMeaning))) throw new Exception("AI 正确选项未完整保留字典义项，已拒绝缓存。");
-                        optionText = fullMeaning;
+                        if (!normalized.equals(normalizeMeaning(practiceMeaning))) throw new Exception("AI 正确选项与给定大意不一致，已拒绝缓存。");
+                        optionText = practiceMeaning;
                     } else {
                         if (normalized.equals(normalizeMeaning(fullMeaning))) throw new Exception("AI 错误选项也包含完整正确义项，已拒绝缓存。");
-                        if (overlapsDictionarySense(optionText, fullMeaning))
-                            throw new Exception("AI 干扰项包含该词真实字典义项，已拒绝缓存。");
+                        if (VocabularyRules.meaningsOverlap(optionText, fullMeaning))
+                            throw new Exception("AI 干扰项与正确词义过于接近，已拒绝缓存。");
+                        for (String other : distractors) if (VocabularyRules.meaningsOverlap(optionText, other))
+                            throw new Exception("AI 干扰项意思过于接近，已拒绝缓存。");
                         distractors.add(normalized);
                     }
                     byOption.put(optionId, new JSONObject().put("id", optionId).put("text", optionText));
@@ -196,13 +206,14 @@ public final class AiClient {
                         .matcher(explanation).find())
                     throw new Exception("AI 题目解释引用固定选项位置，无法安全洗牌，已拒绝缓存。");
                 tiersByLevel.put(level, new JSONObject().put("level", level)
-                        .put("question", "选出 “" + word + "” 完整且准确的词典义项。")
+                        .put("question", VocabularyRules.CHOICE_QUESTION).put("policyVersion", VocabularyRules.POLICY_VERSION)
                         .put("options", safeOptions).put("answer", correct).put("explanation", explanation));
             }
             JSONArray safeTiers = new JSONArray();
             for (int level = 1; level <= 3; level++) safeTiers.put(tiersByLevel.get(level));
             // The dictionary is authoritative; AI-supplied meanings are discarded, never replacing/deleting senses.
             safeById.put(id, new JSONObject().put("word_id", id).put("word", word)
+                    .put("policyVersion", VocabularyRules.POLICY_VERSION)
                     .put("meanings", new JSONArray().put(fullMeaning))
                     .put("example", new JSONObject().put("en", en).put("zh", zh).put("usage", usage)).put("tiers", safeTiers));
         }
@@ -471,17 +482,6 @@ public final class AiClient {
     }
 
     private static String normalizeMeaning(String value) { return value.trim().replaceAll("\\s+", " "); }
-
-    /** Conservative exact-sense guard; semantic equivalence still requires the model and learner review. */
-    private static boolean overlapsDictionarySense(String candidate, String dictionary) {
-        String compactCandidate = candidate.replaceAll("[\\s\\p{Punct}，。；：、（）【】]", "");
-        for (String raw : dictionary.split("[;；,，\\n/]+")) {
-            String sense = raw.replaceAll("\\([^)]*\\)|（[^）]*）|\\[[^]]*\\]|【[^】]*】", "")
-                    .replaceFirst("^[^\\p{IsHan}]*", "").replaceAll("\\s+", "").trim();
-            if (sense.length() >= 2 && sense.matches("[\\p{IsHan}]+") && compactCandidate.contains(sense)) return true;
-        }
-        return false;
-    }
 
     private String prompt(String filename) throws IOException {
         return promptSource.load(filename);
